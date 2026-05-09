@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Diagnostic 360 — Скрининг развития ребёнка</title>
+  <style>
+    :root {
+      --bg: #F7F8FA;
+      --card: #FFFFFF;
+      --ink: #1A1F36;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --brand: #1F3864;
+      --brand-light: #2E5BAA;
+      --green: #2E7D32;
+      --green-bg: #E8F5E9;
+      --yellow: #E65100;
+      --yellow-bg: #FFF3E0;
+      --red: #C62828;
+      --red-bg: #FFEBEE;
+      --shadow: 0 2px 12px rgba(26,31,54,0.08);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* NAV */
+    .nav {
+      padding: 12px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .nav-logo {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--brand-light), var(--brand));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;
+    }
+    .nav-title { font-weight: 700; font-size: 14px; flex: 1; }
+    .nav-sub { font-size: 10px; color: var(--muted); }
+    .lang-switcher { display: flex; gap: 3px; }
+    .lang-btn {
+      padding: 3px 7px; border-radius: 6px;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--muted); font-size: 11px; font-weight: 700;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .lang-btn.active { background: var(--brand); color: white; border-color: var(--brand); }
+
+    /* PROGRESS */
+    .progress-wrap { background: var(--border); height: 3px; }
+    .progress-bar { height: 100%; background: var(--brand); transition: width .3s ease; }
+
+    /* CONTENT */
+    .content { flex: 1; padding: 24px 20px 48px; }
+
+    /* BUTTONS */
+    .btn {
+      display: block; width: 100%;
+      padding: 14px 20px; border-radius: 10px;
+      border: none; font-family: inherit;
+      font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: all .15s; text-align: center;
+    }
+    .btn-primary { background: var(--brand); color: white; }
+    .btn-primary:hover { background: #26437a; }
+    .btn-secondary {
+      background: var(--card); color: var(--ink);
+      border: 1.5px solid var(--border); margin-top: 10px;
+    }
+    .btn-secondary:hover { background: var(--bg); }
+
+    /* WELCOME */
+    .welcome-logo {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: linear-gradient(135deg, var(--brand-light), var(--brand));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 800; font-size: 22px;
+      margin-bottom: 20px;
+    }
+    .welcome-title { font-size: 26px; font-weight: 700; color: var(--brand); margin-bottom: 10px; }
+    .welcome-desc { color: var(--muted); font-size: 15px; margin-bottom: 22px; line-height: 1.6; }
+    .features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .feature { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; }
+    .feature-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .feature-text { color: var(--muted); }
+
+    /* FORM */
+    .section-h { margin-bottom: 20px; }
+    .section-h h2 { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+    .section-h p { font-size: 14px; color: var(--muted); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+    .req { color: var(--red); margin-left: 3px; }
+    .form-input {
+      width: 100%; padding: 12px 14px;
+      border-radius: 8px; border: 1.5px solid var(--border);
+      font-family: inherit; font-size: 15px; color: var(--ink);
+      background: var(--card); transition: border-color .15s;
+      -webkit-appearance: none;
+    }
+    .form-input:focus { outline: none; border-color: var(--brand); }
+    .form-hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+    /* QUIZ */
+    .q-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .domain-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 999px;
+      background: #DDEBF7; color: var(--brand);
+      font-size: 12px; font-weight: 600;
+    }
+    .q-counter { font-size: 12px; color: var(--muted); }
+    .q-text { font-size: 19px; font-weight: 500; line-height: 1.45; margin-bottom: 28px; }
+    .ans-btn {
+      display: block; width: 100%;
+      padding: 14px 16px; border-radius: 10px;
+      border: 1.5px solid var(--border); background: var(--card);
+      font-family: inherit; font-size: 15px; font-weight: 500;
+      cursor: pointer; text-align: left; transition: all .15s;
+      margin-bottom: 10px; color: var(--ink);
+    }
+    .ans-btn:hover { border-color: var(--brand); background: #EFF4FC; }
+    .ans-btn.yes:hover { border-color: var(--green); background: var(--green-bg); }
+    .ans-btn.part:hover { border-color: var(--yellow); background: var(--yellow-bg); }
+    .ans-btn.no:hover { border-color: var(--red); background: var(--red-bg); }
+
+    /* REPORT */
+    .report-center { text-align: center; margin-bottom: 22px; }
+    .report-light {
+      width: 88px; height: 88px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; margin: 0 auto 14px;
+    }
+    .light-green { background: var(--green); }
+    .light-yellow { background: var(--yellow); }
+    .light-red { background: var(--red); }
+    .report-lvl { font-size: 22px; font-weight: 700; margin-bottom: 5px; }
+    .lvl-green { color: var(--green); }
+    .lvl-yellow { color: var(--yellow); }
+    .lvl-red { color: var(--red); }
+    .report-meta { font-size: 13px; color: var(--muted); }
+    .rec {
+      padding: 14px 16px; border-radius: 10px;
+      font-size: 14px; line-height: 1.6; margin-bottom: 18px;
+    }
+    .rec-green { background: var(--green-bg); color: #1B5E20; }
+    .rec-yellow { background: var(--yellow-bg); color: #7F3B00; }
+    .rec-red { background: var(--red-bg); color: #7F0000; }
+    .domains-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+    .domain-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .domain-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--card);
+    }
+    .d-icon { font-size: 18px; flex-shrink: 0; }
+    .d-name { font-size: 13px; font-weight: 500; flex: 1; }
+    .d-bar-wrap { width: 72px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .d-bar { height: 100%; border-radius: 3px; }
+    .bar-green { background: var(--green); }
+    .bar-yellow { background: var(--yellow); }
+    .bar-red { background: var(--red); }
+    .d-score { font-size: 12px; font-weight: 700; width: 34px; text-align: right; }
+    .sc-green { color: var(--green); }
+    .sc-yellow { color: var(--yellow); }
+    .sc-red { color: var(--red); }
+
+    /* NEXT STEPS */
+    .steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+    .step {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 13px 14px; border-radius: 10px;
+      background: var(--card); border: 1px solid var(--border);
+    }
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--brand); color: white;
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .step-text { font-size: 14px; flex: 1; }
+    .disclaimer {
+      padding: 12px 14px; border-radius: 8px;
+      background: #F3F4F6; border: 1px solid var(--border);
+      font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 20px;
+    }
+    .footer-note { text-align: center; font-size: 11px; color: var(--muted); margin-top: 16px; }
+
+    /* PRINT */
+    @media print {
+      body { background: white; }
+      #app { max-width: 100%; }
+      .nav { position: static; }
+      .lang-switcher, .progress-wrap, .btn, .ans-btn, .no-print { display: none !important; }
+      .print-report { display: block !important; }
+    }
+    .print-report { display: none; }
+    .print-domain-row { display: flex; gap: 8px; font-size: 13px; padding: 4px 0; border-bottom: 1px solid #eee; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+const S = {
+  lang: 'ru',
+  childAge: null,
+  childName: '',
+  filteredQ: [],
+  qIdx: 0,
+  answers: {},
+  screen: 'welcome'
+};
+
+// ─────────────────────────────────────────
+// TRANSLATIONS
+// ─────────────────────────────────────────
+const T = {
+  ru: {
+    appName: 'Diagnostic 360',
+    appSub: 'Скрининг нейроразвития',
+    domains: { motor:'Моторика', speech:'Речь и язык', cognition:'Когниция', sensory:'Сенсорика', behavior:'Поведение', social:'Социальное' },
+    icons:   { motor:'🏃', speech:'💬', cognition:'🧠', sensory:'👁️', behavior:'😌', social:'👫' },
+    welcome: {
+      title: 'Скрининг развития ребёнка',
+      desc: 'Ответьте на вопросы о развитии вашего ребёнка и получите бесплатный отчёт «Светофор» с рекомендациями специалиста.',
+      f1: '15–25 минут. Без регистрации.',
+      f2: '6 доменов: моторика, речь, когниция, сенсорика, поведение, социальное.',
+      f3: 'Автоматический отчёт с уровнем риска и маршрутом к специалисту.',
+      start: 'Начать скрининг →'
+    },
+    child: {
+      title: 'Данные о ребёнке',
+      desc: 'Укажите возраст — подберём подходящие вопросы.',
+      nameLbl: 'Имя ребёнка (необязательно)',
+      namePh: 'Например: Айдос',
+      ageLbl: 'Возраст в месяцах',
+      agePh: 'Например: 18',
+      ageHint: '1 год = 12 мес, 2 года = 24 мес, 3 года = 36 мес, 4 года = 48 мес.',
+      next: 'Перейти к вопросам →',
+      errAge: 'Укажите возраст ребёнка от 1 до 84 месяцев.'
+    },
+    quiz: { of:'из', yes:'Да, делает', part:'Иногда / не всегда', no:'Нет, не делает' },
+    report: {
+      title: 'Результат скрининга',
+      child: 'Ребёнок', age: 'Возраст', mo: 'мес.',
+      domainsSec: 'Результаты по доменам',
+      lvlGreen: 'Норма развития',
+      lvlYellow: 'Требует внимания',
+      lvlRed: 'Зоны риска',
+      recGreen: '✓ Развитие соответствует возрасту. Рекомендуется плановый осмотр педиатра. Повторите скрининг через 3–6 месяцев.',
+      recYellow: '⚠ Выявлены области, требующие внимания. Рекомендуется консультация специалиста (педиатр, дефектолог) в течение 1 месяца.',
+      recRed: '🚨 Выявлены зоны риска в нескольких доменах. Не откладывайте обращение к неврологу или дефектологу более чем на 2 недели.',
+      next: 'Что делать дальше →'
+    },
+    steps: {
+      title: 'Что делать дальше',
+      desc: 'Несколько важных шагов:',
+      s1: 'Сохраните этот отчёт — нажмите «Сохранить PDF» ниже.',
+      s2: 'Покажите отчёт педиатру или специалисту на ближайшем приёме.',
+      s3: 'Повторите скрининг через 3 месяца — отслеживайте динамику.',
+      disc: 'Важно: этот инструмент является скрининговым, а не диагностическим. Скрининг не ставит диагноз — только специалист может провести полноценную оценку. Если вас что-то беспокоит в развитии ребёнка, обратитесь к специалисту независимо от результата.',
+      pdf: '📄 Сохранить PDF',
+      again: 'Пройти заново'
+    }
+  },
+  kz: {
+    appName: 'Diagnostic 360',
+    appSub: 'Нейродаму скринингі',
+    domains: { motor:'Моторика', speech:'Сөйлеу', cognition:'Танымдық', sensory:'Сенсорлық', behavior:'Мінез-құлық', social:'Әлеуметтік' },
+    icons:   { motor:'🏃', speech:'💬', cognition:'🧠', sensory:'👁️', behavior:'😌', social:'👫' },
+    welcome: {
+      title: 'Баланың дамуын скринингтеу',
+      desc: 'Балаңыздың дамуы туралы сұрақтарға жауап беріңіз және тегін «Светофор» есебін алыңыз.',
+      f1: '15–25 минут. Тіркеусіз.',
+      f2: '6 сала: моторика, сөйлеу, таным, сенсорика, мінез-құлық, әлеуметтік.',
+      f3: 'Тәуекел деңгейі мен маман ұсынымдарын қамтитын автоматты есеп.',
+      start: 'Скринингті бастау →'
+    },
+    child: {
+      title: 'Баланың деректері',
+      desc: 'Жасын көрсетіңіз — тиісті сұрақтарды таңдаймыз.',
+      nameLbl: 'Баланың аты (міндетті емес)',
+      namePh: 'Мысалы: Айдос',
+      ageLbl: 'Жасы (айлармен)',
+      agePh: 'Мысалы: 18',
+      ageHint: '1 жыл = 12 ай, 2 жыл = 24 ай, 3 жыл = 36 ай, 4 жыл = 48 ай.',
+      next: 'Сұрақтарға өту →',
+      errAge: 'Баланың жасын 1-ден 84 айға дейін көрсетіңіз.'
+    },
+    quiz: { of:'/', yes:'Иә, жасайды', part:'Кейде / әрқашан емес', no:'Жоқ, жасамайды' },
+    report: {
+      title: 'Скрининг нәтижесі',
+      child: 'Бала', age: 'Жасы', mo: 'ай',
+      domainsSec: 'Салалар бойынша нәтижелер',
+      lvlGreen: 'Даму нормасы',
+      lvlYellow: 'Назар аударуды қажет етеді',
+      lvlRed: 'Тәуекел аймақтары',
+      recGreen: '✓ Даму жасқа сәйкес. Педиатрдың жоспарлы тексеруі ұсынылады. Скринингті 3–6 айдан кейін қайталаңыз.',
+      recYellow: '⚠ Назар аударуды қажет ететін салалар анықталды. 1 ай ішінде маман кеңесі ұсынылады.',
+      recRed: '🚨 Бірнеше салада тәуекел аймақтары анықталды. Неврологқа немесе дефектологқа 2 аптадан кешіктірмей хабарласыңыз.',
+      next: 'Әрі қарай не істеу керек →'
+    },
+    steps: {
+      title: 'Әрі қарай не істеу керек',
+      desc: 'Бірнеше маңызды қадам:',
+      s1: 'Осы есепті сақтаңыз — төмендегі «PDF сақтау» батырмасын басыңыз.',
+      s2: 'Есепті жақын кездесуде педиатрға немесе маманға көрсетіңіз.',
+      s3: 'Скринингті 3 айдан кейін қайталаңыз — динамиканы бақылаңыз.',
+      disc: 'Маңызды: бұл құрал скрининг болып табылады, диагностикалық емес. Тек маман толық бағалау жүргізіп, диагноз қоя алады. Алаңдасаңыз, нәтижеге қарамастан маманға хабарласыңыз.',
+      pdf: '📄 PDF сақтау',
+      again: 'Қайтадан өту'
+    }
+  },
+  en: {
+    appName: 'Diagnostic 360',
+    appSub: 'Child neurodevelopmental screening',
+    domains: { motor:'Motor skills', speech:'Speech & Language', cognition:'Cognition', sensory:'Sensory', behavior:'Behavior', social:'Social' },
+    icons:   { motor:'🏃', speech:'💬', cognition:'🧠', sensory:'👁️', behavior:'😌', social:'👫' },
+    welcome: {
+      title: 'Child Development Screening',
+      desc: 'Answer questions about your child\'s development and get a free "Traffic Light" report with specialist recommendations.',
+      f1: '15–25 minutes. No registration required.',
+      f2: '6 domains: motor, speech, cognition, sensory, behavior, social.',
+      f3: 'Automatic report with risk level and referral pathway.',
+      start: 'Start Screening →'
+    },
+    child: {
+      title: 'Child Information',
+      desc: 'Enter your child\'s age to select the right questions.',
+      nameLbl: 'Child\'s name (optional)',
+      namePh: 'e.g. Aidos',
+      ageLbl: 'Age in months',
+      agePh: 'e.g. 18',
+      ageHint: '1 year = 12 mo, 2 years = 24 mo, 3 years = 36 mo, 4 years = 48 mo.',
+      next: 'Go to questions →',
+      errAge: 'Please enter your child\'s age (1–84 months).'
+    },
+    quiz: { of:'of', yes:'Yes, does this', part:'Sometimes / not always', no:'No, doesn\'t do this' },
+    report: {
+      title: 'Screening Result',
+      child: 'Child', age: 'Age', mo: 'mo.',
+      domainsSec: 'Results by domain',
+      lvlGreen: 'Developing normally',
+      lvlYellow: 'Needs attention',
+      lvlRed: 'Risk areas detected',
+      recGreen: '✓ Development is age-appropriate. A routine pediatric check-up is recommended. Repeat screening in 3–6 months.',
+      recYellow: '⚠ Some areas need attention. Consultation with a specialist is recommended within 1 month.',
+      recRed: '🚨 Risk areas identified in multiple domains. Prompt consultation with a neurologist or developmental specialist is recommended — do not delay more than 2 weeks.',
+      next: 'What to do next →'
+    },
+    steps: {
+      title: 'What to do next',
+      desc: 'A few important steps:',
+      s1: 'Save this report — click "Save PDF" below.',
+      s2: 'Show the report to your pediatrician or specialist at your next visit.',
+      s3: 'Repeat the screening in 3 months to track your child\'s progress.',
+      disc: 'Important: this is a screening tool, not a diagnostic instrument. Screening does not provide a diagnosis — only a qualified specialist can conduct a full assessment. If you have any concerns about your child\'s development, consult a specialist regardless of the screening result.',
+      pdf: '📄 Save PDF',
+      again: 'Start over'
+    }
+  }
+};
+
+// ─────────────────────────────────────────
+// QUESTIONS (25 total, CDC LTSAE + Denver DDST-II methodology)
+// ─────────────────────────────────────────
+const QS = [
+  // MOTOR (5)
+  { id:1,  domain:'motor',    age_min:2,  age_max:12,
+    ru:'Когда ребёнок лежит на животе, он поднимает и удерживает голову?',
+    kz:'Іштен жатқанда бала басын көтеріп ұстай ала ма?',
+    en:'When on their tummy, does the child lift and hold their head up?' },
+  { id:2,  domain:'motor',    age_min:4,  age_max:18,
+    ru:'Ребёнок переворачивается — с живота на спину или со спины на живот?',
+    kz:'Бала іштен арқаға немесе арқадан іштен аунай алады ма?',
+    en:'Does the child roll over — from tummy to back or back to tummy?' },
+  { id:3,  domain:'motor',    age_min:6,  age_max:18,
+    ru:'Ребёнок сидит без поддержки взрослого (не менее 30 секунд)?',
+    kz:'Бала ересек адамның қолдауынсыз отыра алады ма (кемінде 30 секунд)?',
+    en:'Does the child sit without adult support (at least 30 seconds)?' },
+  { id:4,  domain:'motor',    age_min:9,  age_max:24,
+    ru:'Ребёнок ходит самостоятельно или с лёгкой опорой?',
+    kz:'Бала өздігінен немесе жеңіл сүйеніп жүре алады ма?',
+    en:'Does the child walk independently or with light support?' },
+  { id:5,  domain:'motor',    age_min:18, age_max:72,
+    ru:'Ребёнок бегает, прыгает на двух ногах, поднимается по ступеням (держась)?',
+    kz:'Бала жүгіреді, екі аяқпен секіреді, сатыдан шыға алады ма (сүйеніп)?',
+    en:'Does the child run, jump on two feet, and climb stairs (holding on)?' },
+  // SPEECH (4)
+  { id:6,  domain:'speech',   age_min:2,  age_max:9,
+    ru:'Ребёнок гулит — произносит протяжные гласные звуки (аа, уу, ыы)?',
+    kz:'Бала ыңырсиды — созыңқы дауысты дыбыстар шығарады ма (аа, уу)?',
+    en:'Does the child coo — making prolonged vowel sounds (aah, ooh)?' },
+  { id:7,  domain:'speech',   age_min:6,  age_max:18,
+    ru:'Ребёнок лепечет — повторяет слоги: «ма-ма», «да-да», «ба-ба»?',
+    kz:'Бала мылжыңдайды — «ма-ма», «да-да», «ба-ба» деп қайталайды ма?',
+    en:'Does the child babble — repeating syllables like "ma-ma", "da-da", "ba-ba"?' },
+  { id:8,  domain:'speech',   age_min:12, age_max:36,
+    ru:'Ребёнок говорит хотя бы 1–3 осмысленных слова (не лепет, а настоящие слова)?',
+    kz:'Бала кемінде 1–3 мағыналы сөз айтады ма (шынайы сөздер, буын-буын емес)?',
+    en:'Does the child say at least 1–3 meaningful words (real words, not just babbling)?' },
+  { id:9,  domain:'speech',   age_min:24, age_max:72,
+    ru:'Ребёнок строит фразы из двух и более слов («мама, дай», «хочу пить»)?',
+    kz:'Бала 2 немесе одан да көп сөзден тұратын тіркестер жасайды ма?',
+    en:'Does the child form phrases of 2+ words ("mama give", "want drink")?' },
+  // COGNITION (4)
+  { id:10, domain:'cognition', age_min:3,  age_max:18,
+    ru:'Ребёнок узнаёт маму / основного опекуна (улыбается, тянется к нему)?',
+    kz:'Бала анасын / негізгі күтушісін таниды ма (күлімсірейді, қарай тартылады)?',
+    en:'Does the child recognize their mother / main caregiver (smiles, reaches toward them)?' },
+  { id:11, domain:'cognition', age_min:6,  age_max:24,
+    ru:'Ребёнок ищет предмет, который упал или был скрыт под тканью?',
+    kz:'Бала түсіп кеткен немесе матаның астына жасырылған затты іздейді ме?',
+    en:'Does the child search for an object that fell or was hidden under a cloth?' },
+  { id:12, domain:'cognition', age_min:12, age_max:60,
+    ru:'Ребёнок выполняет простые словесные инструкции: «дай», «принеси», «покажи»?',
+    kz:'Бала қарапайым сөздік нұсқауларды орындайды ма: «бер», «әкел», «көрсет»?',
+    en:'Does the child follow simple verbal instructions: "give", "bring", "show me"?' },
+  { id:13, domain:'cognition', age_min:24, age_max:72,
+    ru:'Ребёнок сортирует предметы по цвету или форме (похожие складывает вместе)?',
+    kz:'Бала заттарды түсіне немесе пішіне қарай сорттайды ма (ұқсастарын бірге жинайды)?',
+    en:'Does the child sort objects by color or shape (grouping similar items together)?' },
+  // SENSORY (4)
+  { id:14, domain:'sensory',   age_min:1,  age_max:12,
+    ru:'Ребёнок реагирует на громкие звуки — вздрагивает или поворачивает голову?',
+    kz:'Бала қатты дыбыстарға жауап береді ме — шошып немесе басын бұра ма?',
+    en:'Does the child react to loud sounds — startling or turning their head?' },
+  { id:15, domain:'sensory',   age_min:3,  age_max:36,
+    ru:'Ребёнок не проявляет резкой негативной реакции на прикосновения или разные фактуры?',
+    kz:'Бала жанасуға немесе түрлі текстураларға күрт теріс реакция білдірмейді ме?',
+    en:'Does the child not show strong negative reactions to touch or different textures?' },
+  { id:16, domain:'sensory',   age_min:6,  age_max:72,
+    ru:'Ребёнок переносит смену привычной обстановки без сильного дистресса?',
+    kz:'Бала таныс ортаның өзгеруін күшті стрессіз қабылдайды ма?',
+    en:'Does the child tolerate changes in routine / environment without extreme distress?' },
+  { id:17, domain:'sensory',   age_min:12, age_max:72,
+    ru:'Ребёнок спокойно переносит обычные бытовые звуки (пылесос, фен, телевизор)?',
+    kz:'Бала күнделікті тұрмыстық дыбыстарды тыныш қабылдайды ма (шаңсорғыш, фен, теледидар)?',
+    en:'Does the child calmly tolerate everyday household sounds (vacuum, hairdryer, TV)?' },
+  // BEHAVIOR (4)
+  { id:18, domain:'behavior',  age_min:3,  age_max:18,
+    ru:'Ребёнок успокаивается в течение 5–10 минут при утешении взрослым?',
+    kz:'Бала ересек тынышталдырғанда 5–10 минут ішінде тынышталады ма?',
+    en:'Does the child calm down within 5–10 minutes when comforted by an adult?' },
+  { id:19, domain:'behavior',  age_min:12, age_max:72,
+    ru:'У ребёнка не бывает частых длительных истерик (более 3 в день, дольше 20 мин)?',
+    kz:'Балада жиі ұзаққа созылатын истерика болмайды ма (күніне 3-тен артық, 20 мин-тан астам)?',
+    en:'Does the child not have frequent prolonged tantrums (more than 3 per day, over 20 min each)?' },
+  { id:20, domain:'behavior',  age_min:18, age_max:72,
+    ru:'Ребёнок может самостоятельно занять себя игрой не менее 5 минут?',
+    kz:'Бала кемінде 5 минут бойы өздігінен ойнай алады ма?',
+    en:'Can the child entertain themselves independently with play for at least 5 minutes?' },
+  { id:21, domain:'behavior',  age_min:36, age_max:72,
+    ru:'Ребёнок понимает и принимает простые правила («нельзя», «надо делиться»)?',
+    kz:'Бала қарапайым ережелерді түсінеді және қабылдайды ма («болмайды», «бөлісу керек»)?',
+    en:'Does the child understand and follow simple rules ("no", "need to share")?' },
+  // SOCIAL (4)
+  { id:22, domain:'social',    age_min:2,  age_max:12,
+    ru:'Ребёнок улыбается в ответ на улыбку взрослого?',
+    kz:'Бала ересек адамның күлімсіреуіне жауап ретінде күлімсірейді ме?',
+    en:'Does the child smile back when an adult smiles at them?' },
+  { id:23, domain:'social',    age_min:6,  age_max:24,
+    ru:'Ребёнок оборачивается или реагирует, когда называют его имя?',
+    kz:'Бала атын айтқанда бұрылады немесе жауап береді ме?',
+    en:'Does the child turn or respond when their name is called?' },
+  { id:24, domain:'social',    age_min:12, age_max:60,
+    ru:'Ребёнок играет в простые игры со взрослым: «ку-ку», «ладушки», мяч?',
+    kz:'Бала ересек адаммен қарапайым ойындар ойнайды ма: «ку-ку», «ладушки», доп?',
+    en:'Does the child play simple games with adults: peek-a-boo, pat-a-cake, ball?' },
+  { id:25, domain:'social',    age_min:24, age_max:72,
+    ru:'Ребёнок интересуется другими детьми и пытается играть рядом или вместе?',
+    kz:'Бала басқа балаларға қызығушылық танытады ма және олармен ойнауға тырысады ма?',
+    en:'Does the child show interest in other children and try to play near or with them?' },
+];
+
+// ─────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────
+function tx(obj, key) {
+  const parts = key.split('.');
+  let v = obj;
+  for (const p of parts) v = v?.[p];
+  return v || key;
+}
+function t(key) { return tx(T[S.lang], key); }
+
+function filterQ(age) {
+  return QS.filter(q => age >= q.age_min && age <= q.age_max);
+}
+
+function calcScores() {
+  const domains = ['motor','speech','cognition','sensory','behavior','social'];
+  const r = {};
+  domains.forEach(d => {
+    const dqs = S.filteredQ.filter(q => q.domain === d);
+    if (!dqs.length) { r[d] = null; return; }
+    let sum = 0;
+    dqs.forEach(q => { sum += (S.answers[q.id] ?? 0); });
+    r[d] = Math.round((sum / dqs.length) * 100);
+  });
+  const valid = Object.values(r).filter(v => v !== null);
+  r.overall = valid.length ? Math.round(valid.reduce((a,b)=>a+b,0)/valid.length) : 0;
+  return r;
+}
+
+function riskCls(s) {
+  if (s === null) return 'green';
+  if (s >= 80) return 'green';
+  if (s >= 60) return 'yellow';
+  return 'red';
+}
+
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function goTo(scr) {
+  S.screen = scr;
+  render();
+  window.scrollTo(0, 0);
+}
+
+function setLang(l) { S.lang = l; render(); }
+
+function startQuiz() {
+  const age = parseInt(document.getElementById('ageInput').value);
+  const name = document.getElementById('nameInput').value.trim();
+  if (!age || age < 1 || age > 84) { alert(t('child.errAge')); return; }
+  S.childAge = age;
+  S.childName = name;
+  S.filteredQ = filterQ(age);
+  S.qIdx = 0;
+  S.answers = {};
+  if (!S.filteredQ.length) { alert('Для данного возраста вопросы не найдены (попробуйте 2–72 мес.).'); return; }
+  goTo('quiz');
+}
+
+function answer(val) {
+  const q = S.filteredQ[S.qIdx];
+  S.answers[q.id] = val;
+  if (S.qIdx < S.filteredQ.length - 1) { S.qIdx++; render(); window.scrollTo(0,0); }
+  else goTo('report');
+}
+
+function savePDF() {
+  if (S.screen !== 'report') { S.screen = 'report'; render(); }
+  setTimeout(() => window.print(), 80);
+}
+
+function pct() {
+  if (S.screen === 'welcome') return 0;
+  if (S.screen === 'child')   return 8;
+  if (S.screen === 'quiz')    return 8 + Math.round(72 * S.qIdx / (S.filteredQ.length||1));
+  return 100;
+}
+
+// ─────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────
+function nav(progress) {
+  return `<div class="nav">
+    <div class="nav-logo">D°</div>
+    <div><div class="nav-title">${t('appName')}</div><div class="nav-sub">${t('appSub')}</div></div>
+    <div class="lang-switcher">
+      ${['ru','kz','en'].map(l=>`<button class="lang-btn${S.lang===l?' active':''}" onclick="setLang('${l}')">${l.toUpperCase()}</button>`).join('')}
+    </div>
+  </div>
+  ${progress ? `<div class="progress-wrap"><div class="progress-bar" style="width:${pct()}%"></div></div>` : ''}`;
+}
+
+function screenWelcome() {
+  return `${nav(false)}<div class="content">
+    <div class="welcome-logo">D°</div>
+    <h1 class="welcome-title">${t('welcome.title')}</h1>
+    <p class="welcome-desc">${t('welcome.desc')}</p>
+    <div class="features">
+      <div class="feature"><span class="feature-icon">⏱️</span><span class="feature-text">${t('welcome.f1')}</span></div>
+      <div class="feature"><span class="feature-icon">🔬</span><span class="feature-text">${t('welcome.f2')}</span></div>
+      <div class="feature"><span class="feature-icon">📊</span><span class="feature-text">${t('welcome.f3')}</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="goTo('child')">${t('welcome.start')}</button>
+    <p class="footer-note">Basqa Development Space · ТОО Neurotech Solutions · Шымкент, Казахстан</p>
+  </div>`;
+}
+
+function screenChild() {
+  return `${nav(true)}<div class="content">
+    <div class="section-h"><h2>${t('child.title')}</h2><p>${t('child.desc')}</p></div>
+    <div class="form-group">
+      <label class="form-label" for="nameInput">${t('child.nameLbl')}</label>
+      <input class="form-input" type="text" id="nameInput" placeholder="${t('child.namePh')}" value="${S.childName}">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="ageInput">${t('child.ageLbl')} <span class="req">*</span></label>
+      <input class="form-input" type="number" id="ageInput" placeholder="${t('child.agePh')}" min="1" max="84" value="${S.childAge||''}">
+      <div class="form-hint">${t('child.ageHint')}</div>
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()">${t('child.next')}</button>
+  </div>`;
+}
+
+function screenQuiz() {
+  const q = S.filteredQ[S.qIdx];
+  const total = S.filteredQ.length;
+  const qText = q[S.lang] || q.ru;
+  return `${nav(true)}<div class="content">
+    <div class="q-meta">
+      <div class="domain-badge">${t('icons.'+q.domain)} ${t('domains.'+q.domain)}</div>
+      <div class="q-counter">${S.qIdx+1} ${t('quiz.of')} ${total}</div>
+    </div>
+    <div class="q-text">${qText}</div>
+    <button class="ans-btn yes" onclick="answer(1)">${t('quiz.yes')}</button>
+    <button class="ans-btn part" onclick="answer(0.5)">${t('quiz.part')}</button>
+    <button class="ans-btn no"  onclick="answer(0)">${t('quiz.no')}</button>
+  </div>`;
+}
+
+function screenReport() {
+  const sc = calcScores();
+  const cls = riskCls(sc.overall);
+  const emoji = {green:'✅', yellow:'⚠️', red:'🚨'}[cls];
+  const childLabel = S.childName || t('report.child');
+  const domains = ['motor','speech','cognition','sensory','behavior','social'];
+  const date = new Date().toLocaleDateString(S.lang==='en'?'en-US':S.lang==='kz'?'kk-KZ':'ru-RU');
+
+  const domainRows = domains.map(d => {
+    const s = sc[d];
+    if (s === null) return '';
+    const dc = riskCls(s);
+    return `<div class="domain-row">
+      <span class="d-icon">${t('icons.'+d)}</span>
+      <span class="d-name">${t('domains.'+d)}</span>
+      <div class="d-bar-wrap"><div class="d-bar bar-${dc}" style="width:${s}%"></div></div>
+      <span class="d-score sc-${dc}">${s}%</span>
+    </div>`;
+  }).join('');
+
+  // Print version domain table
+  const printDomains = domains.map(d => {
+    const s = sc[d];
+    if (s === null) return '';
+    const dc = riskCls(s);
+    const mark = {green:'✓', yellow:'~', red:'!'}[dc];
+    return `<div class="print-domain-row"><span>${t('icons.'+d)} ${t('domains.'+d)}</span><span style="margin-left:auto;font-weight:700;">${mark} ${s}%</span></div>`;
+  }).join('');
+
+  return `${nav(false)}<div class="content">
+    <div class="report-center">
+      <div class="report-light light-${cls}">${emoji}</div>
+      <div class="report-lvl lvl-${cls}">${t('report.lvl'+cap(cls))}</div>
+      <div class="report-meta">${childLabel} · ${t('report.age')} ${S.childAge} ${t('report.mo')} · ${date}</div>
+    </div>
+    <div class="rec rec-${cls}">${t('report.rec'+cap(cls))}</div>
+    <div class="domains-label">${t('report.domainsSec')}</div>
+    <div class="domain-rows">${domainRows}</div>
+    <button class="btn btn-primary" onclick="goTo('steps')">${t('report.next')}</button>
+    <button class="btn btn-secondary no-print" onclick="savePDF()">${t('steps.pdf')}</button>
+  </div>
+
+  <div class="print-report" style="padding:24px 20px;font-family:Arial,sans-serif;">
+    <h2 style="color:#1F3864;margin-bottom:2px;">Diagnostic 360</h2>
+    <p style="color:#6B7280;font-size:11px;margin-bottom:14px;">Basqa Development Space · ТОО Neurotech Solutions · ${date}</p>
+    <h3 style="margin-bottom:8px;">${t('report.title')}</h3>
+    <p style="margin-bottom:4px;"><strong>${childLabel}</strong> · ${t('report.age')} ${S.childAge} ${t('report.mo')}</p>
+    <p style="margin-bottom:12px;font-size:14px;">${t('report.lvl'+cap(cls))} — ${sc.overall}%</p>
+    <p style="margin-bottom:14px;font-size:13px;">${t('report.rec'+cap(cls)).replace(/^[✓⚠🚨]\s*/,'')}</p>
+    <div>${printDomains}</div>
+    <p style="margin-top:14px;font-size:11px;color:#6B7280;">Инструмент является скрининговым. Только специалист может поставить диагноз. · Diagnostic 360 by Basqa Development Space</p>
+  </div>`;
+}
+
+function screenSteps() {
+  return `${nav(false)}<div class="content">
+    <div class="section-h"><h2>${t('steps.title')}</h2><p>${t('steps.desc')}</p></div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text">${t('steps.s1')}</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">${t('steps.s2')}</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">${t('steps.s3')}</div></div>
+    </div>
+    <div class="disclaimer">${t('steps.disc')}</div>
+    <button class="btn btn-primary" onclick="savePDF()">${t('steps.pdf')}</button>
+    <button class="btn btn-secondary" onclick="goTo('welcome')">${t('steps.again')}</button>
+    <p class="footer-note">Diagnostic 360 · Basqa Development Space · ТОО Neurotech Solutions</p>
+  </div>`;
+}
+
+// ─────────────────────────────────────────
+// MAIN
+// ─────────────────────────────────────────
+function render() {
+  const map = { welcome:screenWelcome, child:screenChild, quiz:screenQuiz, report:screenReport, steps:screenSteps };
+  document.getElementById('app').innerHTML = (map[S.screen] || screenWelcome)();
+}
+
+render();
+</script>
+</body>
+</html>
