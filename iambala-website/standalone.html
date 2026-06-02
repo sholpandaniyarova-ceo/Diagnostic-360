@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IamBALA — Я есть · Мен бармын · I am</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'brand-teal': '#4DC8D8',
+        'brand-green': '#8DC63F',
+        'brand-orange': '#F7941D',
+        'brand-accent': '#F15A29',
+        'brand-text': '#2D2D2D',
+      },
+      fontFamily: {
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        sans: ['Nunito', 'system-ui', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Nunito', system-ui, sans-serif; color: #2D2D2D; }
+  .font-display { font-family: 'Playfair Display', Georgia, serif; }
+
+  .fade-section { opacity: 0; transform: translateY(28px); transition: opacity .75s ease-out, transform .75s ease-out; }
+  .fade-section.visible { opacity: 1; transform: translateY(0); }
+
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  @keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  .animate-float-slow { animation: floatSlow 9s ease-in-out infinite; }
+
+  .card-hover { transition: all .3s ease; }
+  .card-hover:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,.12); }
+
+  .btn-primary { background:#4DC8D8; color:#fff; font-weight:600; border-radius:999px; padding:14px 32px; border:none; cursor:pointer; transition:all .2s; font-family:Nunito,sans-serif; font-size:15px; }
+  .btn-primary:hover { background:#3ab8c8; transform:translateY(-2px); box-shadow:0 8px 24px rgba(77,200,216,.35); }
+  .btn-outline { background:transparent; color:#fff; font-weight:600; border-radius:999px; padding:12px 30px; border:2px solid rgba(255,255,255,.5); cursor:pointer; transition:all .2s; font-family:Nunito,sans-serif; font-size:15px; }
+  .btn-outline:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.85); }
+
+  .lang-btn { padding:4px 12px; border-radius:999px; border:none; cursor:pointer; font-family:Nunito,sans-serif; font-size:12px; font-weight:700; transition:all .2s; background:transparent; color:rgba(255,255,255,.7); }
+  .lang-btn.active { background:#4DC8D8; color:#fff; }
+  .lang-btn.scrolled { color:#888; }
+  .lang-btn.scrolled.active { background:#4DC8D8; color:#fff; }
+  .lang-btn:hover { color:#fff; }
+  .lang-btn.scrolled:hover { color:#4DC8D8; }
+
+  input, textarea { outline:none; font-family:Nunito,sans-serif; }
+  input:focus, textarea:focus { border-color:#4DC8D8 !important; box-shadow: 0 0 0 3px rgba(77,200,216,.15); }
+  textarea { resize:none; }
+
+  /* Mobile menu */
+  #mobile-menu { max-height:0; overflow:hidden; transition:max-height .3s ease, opacity .3s ease; opacity:0; }
+  #mobile-menu.open { max-height:280px; opacity:1; }
+
+  .ham-line { display:block; width:20px; height:2px; border-radius:2px; transition:all .3s; }
+  .ham.open .ham-line:nth-child(1) { transform:rotate(45deg) translate(4px,4px); }
+  .ham.open .ham-line:nth-child(2) { opacity:0; transform:scaleX(0); }
+  .ham.open .ham-line:nth-child(3) { transform:rotate(-45deg) translate(4px,-4px); }
+</style>
+</head>
+<body class="bg-white">
+
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
+<header id="header" class="fixed inset-x-0 top-0 z-50 transition-all duration-300">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 md:h-20">
+
+      <!-- Logo -->
+      <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex items-center gap-3 bg-transparent border-none cursor-pointer">
+        <svg width="40" height="40" viewBox="0 0 44 44" fill="none">
+          <circle cx="15" cy="26" r="13" fill="#4DC8D8" fill-opacity=".93"/>
+          <circle cx="29" cy="26" r="13" fill="#8DC63F" fill-opacity=".93"/>
+          <circle cx="22" cy="14" r="13" fill="#F7941D" fill-opacity=".88"/>
+        </svg>
+        <div class="text-left leading-tight">
+          <div id="logo-name" class="text-lg font-bold transition-colors text-white" style="font-family:'Playfair Display',serif">IamBALA</div>
+          <div id="logo-note" class="text-[10px] font-medium transition-colors text-white/60" data-key="nameNote"></div>
+        </div>
+      </button>
+
+      <!-- Desktop nav -->
+      <nav class="hidden md:flex items-center gap-8" id="desktop-nav">
+        <button onclick="scrollTo('mission')" class="nav-link text-sm font-medium text-white/85 hover:text-brand-teal transition-colors bg-transparent border-none cursor-pointer" data-key="nav.mission"></button>
+        <button onclick="scrollTo('programs')" class="nav-link text-sm font-medium text-white/85 hover:text-brand-teal transition-colors bg-transparent border-none cursor-pointer" data-key="nav.programs"></button>
+        <button onclick="scrollTo('team')" class="nav-link text-sm font-medium text-white/85 hover:text-brand-teal transition-colors bg-transparent border-none cursor-pointer" data-key="nav.team"></button>
+        <button onclick="scrollTo('contact')" class="nav-link text-sm font-medium text-white/85 hover:text-brand-teal transition-colors bg-transparent border-none cursor-pointer" data-key="nav.contact"></button>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <!-- Lang switcher -->
+        <div id="lang-wrap" class="flex rounded-full p-0.5" style="background:rgba(255,255,255,.2)">
+          <button class="lang-btn active" onclick="setLang('ru')">RU</button>
+          <button class="lang-btn" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" onclick="setLang('kz')">KZ</button>
+        </div>
+        <!-- Hamburger -->
+        <button class="ham md:hidden flex flex-col justify-center items-center gap-1.5 w-8 h-8 bg-transparent border-none cursor-pointer" onclick="toggleMenu()" id="ham-btn">
+          <span class="ham-line bg-white"></span>
+          <span class="ham-line bg-white"></span>
+          <span class="ham-line bg-white"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="md:hidden bg-white border-t border-gray-100">
+    <button onclick="scrollTo('mission');toggleMenu()" class="block w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:text-brand-teal hover:bg-gray-50 transition-colors bg-transparent border-none cursor-pointer" data-key="nav.mission"></button>
+    <button onclick="scrollTo('programs');toggleMenu()" class="block w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:text-brand-teal hover:bg-gray-50 transition-colors bg-transparent border-none cursor-pointer" data-key="nav.programs"></button>
+    <button onclick="scrollTo('team');toggleMenu()" class="block w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:text-brand-teal hover:bg-gray-50 transition-colors bg-transparent border-none cursor-pointer" data-key="nav.team"></button>
+    <button onclick="scrollTo('contact');toggleMenu()" class="block w-full text-left px-6 py-3 text-sm font-medium text-gray-700 hover:text-brand-teal hover:bg-gray-50 transition-colors bg-transparent border-none cursor-pointer" data-key="nav.contact"></button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════ HERO ═══════════════════════════════ -->
+<section class="relative min-h-screen flex items-center overflow-hidden">
+  <div class="absolute inset-0" style="background:linear-gradient(135deg,#065968,#0d8fa0,#4DC8D8)"></div>
+  <div class="absolute -top-40 -right-40 w-96 h-96 rounded-full animate-float-slow" style="background:rgba(255,255,255,.04)"></div>
+  <div class="absolute top-1/3 -right-16 w-64 h-64 rounded-full animate-float" style="background:rgba(141,198,63,.1)"></div>
+  <div class="absolute -bottom-24 -left-24 w-72 h-72 rounded-full animate-float-slow" style="background:rgba(247,148,29,.1)"></div>
+  <!-- Big decorative circles -->
+  <div class="absolute top-16 right-8 hidden lg:block" style="opacity:.06;pointer-events:none">
+    <svg width="380" height="380" viewBox="0 0 380 380" fill="none">
+      <circle cx="130" cy="230" r="120" fill="#FFF"/>
+      <circle cx="250" cy="230" r="120" fill="#8DC63F"/>
+      <circle cx="190" cy="120" r="120" fill="#F7941D"/>
+    </svg>
+  </div>
+
+  <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20 w-full">
+    <div class="max-w-3xl">
+      <!-- Identity chip -->
+      <div class="inline-flex items-center gap-2 rounded-full px-5 py-2 mb-8" style="background:rgba(255,255,255,.15)">
+        <svg width="20" height="20" viewBox="0 0 44 44" fill="none"><circle cx="15" cy="26" r="13" fill="#4DC8D8" fill-opacity=".93"/><circle cx="29" cy="26" r="13" fill="#8DC63F" fill-opacity=".93"/><circle cx="22" cy="14" r="13" fill="#F7941D" fill-opacity=".88"/></svg>
+        <span class="text-white/90 text-sm font-semibold tracking-wide">Я есть · Мен бармын · I am</span>
+      </div>
+
+      <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-none mb-2">IamBALA</h1>
+      <p class="text-white/50 text-xs font-medium mb-2 tracking-wide" data-key="hero.nameNote"></p>
+      <p class="text-white/50 text-xs mb-6 tracking-wide" data-key="hero.foundation"></p>
+
+      <p class="text-2xl sm:text-3xl text-white/90 font-light leading-snug mb-7 max-w-xl" data-key="hero.tagline"></p>
+      <p class="text-base sm:text-lg leading-relaxed mb-10 max-w-2xl" style="color:rgba(255,255,255,.75)" data-key="hero.mission"></p>
+
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button class="btn-primary" onclick="scrollTo('mission')" data-key="hero.cta"></button>
+        <button class="btn-outline" onclick="scrollTo('contact')" data-key="hero.ctaContact"></button>
+      </div>
+
+      <div class="mt-16 pt-8" style="border-top:1px solid rgba(255,255,255,.15)">
+        <p class="text-xs font-semibold uppercase tracking-widest mb-5" style="color:rgba(255,255,255,.4)" data-key="hero.partners"></p>
+        <div class="flex flex-wrap items-center gap-x-7 gap-y-3">
+          <span class="font-semibold text-sm" style="color:rgba(255,255,255,.5)">ERA-KZ</span>
+          <span style="color:rgba(255,255,255,.5)" class="font-semibold text-sm">UNICEF</span>
+          <span style="color:rgba(255,255,255,.5)" class="font-semibold text-sm">Soros-KZ</span>
+          <span style="color:rgba(255,255,255,.5)" class="font-semibold text-sm">Halyk Foundation</span>
+          <span style="color:rgba(255,255,255,.5)" class="font-semibold text-sm">Арман Алана</span>
+          <span style="color:rgba(255,255,255,.5)" class="font-semibold text-sm">АРДИ</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5" style="opacity:.4">
+    <span class="text-white text-[10px] tracking-widest uppercase">scroll</span>
+    <div class="w-px h-8 bg-white animate-bounce"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ MISSION ═══════════════════════════════ -->
+<section id="mission" class="py-24 bg-white relative overflow-hidden">
+  <div class="absolute -top-24 -left-24 w-64 h-64 rounded-full" style="background:rgba(77,200,216,.05)"></div>
+  <div class="absolute bottom-0 right-0 w-48 h-48 rounded-full translate-x-1/3 translate-y-1/3" style="background:rgba(141,198,63,.05)"></div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="fade-section">
+      <div class="max-w-2xl mx-auto text-center mb-14">
+        <p class="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest mb-5" style="color:#4DC8D8">
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+          <span data-key="missionSec.label"></span>
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+        </p>
+        <h2 class="font-display text-4xl lg:text-5xl" style="color:#2D2D2D" data-key="missionSec.title"></h2>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-12 items-start mb-16">
+        <div class="space-y-6">
+          <blockquote class="text-gray-700 text-lg leading-relaxed italic pl-6" style="border-left:4px solid #4DC8D8" data-key="missionSec.text"></blockquote>
+          <div class="rounded-2xl p-6" style="background:linear-gradient(135deg,rgba(77,200,216,.08),rgba(141,198,63,.08));border:1px solid rgba(77,200,216,.15)">
+            <p class="text-xs font-bold uppercase tracking-widest mb-3" style="color:#4DC8D8" data-key="missionSec.visionLabel"></p>
+            <p class="text-gray-600 leading-relaxed text-sm italic" data-key="missionSec.vision"></p>
+          </div>
+        </div>
+        <!-- Triple-circle motif -->
+        <div class="flex justify-center lg:justify-end">
+          <div class="relative w-64 h-64 flex-shrink-0">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-44 h-44 rounded-full" style="border:2px solid rgba(77,200,216,.3);background:rgba(77,200,216,.08)"></div>
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 w-44 h-44 rounded-full" style="border:2px solid rgba(141,198,63,.3);background:rgba(141,198,63,.08)"></div>
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-44 h-44 rounded-full" style="border:2px solid rgba(247,148,29,.3);background:rgba(247,148,29,.08)"></div>
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center gap-1">
+              <div class="text-5xl">👨‍👩‍👧‍👦</div>
+              <div class="text-xs text-gray-400 font-semibold px-4">Я есть · Мен бармын · I am</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="text-center p-10 rounded-2xl bg-gray-50 card-hover" style="border-top:4px solid #4DC8D8">
+          <div class="font-display text-5xl font-bold mb-3" style="color:#4DC8D8" data-key="missionSec.stat1"></div>
+          <div class="text-gray-500 text-sm" data-key="missionSec.stat1Label"></div>
+        </div>
+        <div class="text-center p-10 rounded-2xl bg-gray-50 card-hover" style="border-top:4px solid #F7941D">
+          <div class="font-display text-5xl font-bold mb-3" style="color:#F7941D" data-key="missionSec.stat2"></div>
+          <div class="text-gray-500 text-sm" data-key="missionSec.stat2Label"></div>
+        </div>
+        <div class="text-center p-10 rounded-2xl bg-gray-50 card-hover" style="border-top:4px solid #8DC63F">
+          <div class="font-display text-5xl font-bold mb-3" style="color:#8DC63F" data-key="missionSec.stat3"></div>
+          <div class="text-gray-500 text-sm" data-key="missionSec.stat3Label"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ VALUES ═══════════════════════════════ -->
+<section class="py-24 relative overflow-hidden" style="background:#F9FAFB">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="fade-section">
+      <div class="max-w-2xl mx-auto text-center mb-14">
+        <p class="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest mb-5" style="color:#4DC8D8">
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+          <span data-key="values.label"></span>
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+        </p>
+        <h2 class="font-display text-4xl lg:text-5xl" style="color:#2D2D2D" data-key="values.title"></h2>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="values-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ PROGRAMS ═══════════════════════════════ -->
+<section id="programs" class="py-24 bg-white relative overflow-hidden">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="fade-section">
+      <div class="max-w-2xl mx-auto text-center mb-14">
+        <p class="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest mb-5" style="color:#4DC8D8">
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+          <span data-key="programs.label"></span>
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+        </p>
+        <h2 class="font-display text-4xl lg:text-5xl" style="color:#2D2D2D" data-key="programs.title"></h2>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-8" id="programs-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ STRATEGY ═══════════════════════════════ -->
+<section class="py-24 relative overflow-hidden">
+  <div class="absolute inset-0" style="background:linear-gradient(135deg,#065968,#0d8fa0)"></div>
+  <div class="absolute -top-20 -right-20 w-72 h-72 rounded-full animate-float-slow" style="background:rgba(255,255,255,.04)"></div>
+  <div class="absolute bottom-0 left-1/4 w-56 h-56 rounded-full animate-float" style="background:rgba(141,198,63,.1)"></div>
+
+  <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="fade-section">
+      <div class="max-w-2xl mx-auto text-center mb-14">
+        <p class="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest mb-5" style="color:rgba(255,255,255,.5)">
+          <span style="display:inline-block;width:32px;height:1px;background:rgba(255,255,255,.4)"></span>
+          <span data-key="strategy.label"></span>
+          <span style="display:inline-block;width:32px;height:1px;background:rgba(255,255,255,.4)"></span>
+        </p>
+        <h2 class="font-display text-4xl lg:text-5xl text-white" data-key="strategy.title"></h2>
+        <p class="text-sm mt-3" style="color:rgba(255,255,255,.55)" data-key="strategy.subtitle"></p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-14" id="strategy-grid"></div>
+      <!-- Roadmap -->
+      <div class="grid grid-cols-3 gap-4 mb-12" id="roadmap-grid"></div>
+      <!-- Funders -->
+      <div class="text-center">
+        <p class="text-xs font-semibold uppercase tracking-widest mb-5" style="color:rgba(255,255,255,.4)" data-key="strategy.funding"></p>
+        <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3" id="funders-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ TEAM ═══════════════════════════════ -->
+<section id="team" class="py-24 relative overflow-hidden" style="background:#F9FAFB">
+  <div class="absolute top-0 right-0 w-72 h-72 rounded-full" style="background:rgba(77,200,216,.05);transform:translate(50%,-50%)"></div>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="fade-section">
+      <div class="max-w-2xl mx-auto text-center mb-14">
+        <p class="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest mb-5" style="color:#4DC8D8">
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+          <span data-key="team.label"></span>
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+        </p>
+        <h2 class="font-display text-4xl lg:text-5xl" style="color:#2D2D2D" data-key="team.title"></h2>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-8" id="team-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ CONTACT ═══════════════════════════════ -->
+<section id="contact" class="py-24 bg-white relative overflow-hidden">
+  <div class="absolute top-1/2 -right-16 w-56 h-56 rounded-full" style="background:rgba(77,200,216,.06)"></div>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="fade-section">
+      <div class="max-w-2xl mx-auto text-center mb-14">
+        <p class="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest mb-5" style="color:#4DC8D8">
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+          <span data-key="contact.label"></span>
+          <span style="display:inline-block;width:32px;height:1px;background:#4DC8D8"></span>
+        </p>
+        <h2 class="font-display text-4xl lg:text-5xl mb-3" style="color:#2D2D2D" data-key="contact.title"></h2>
+        <p class="text-gray-400 text-sm" data-key="contact.subtitle"></p>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-12">
+        <!-- Info -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-4 p-5 rounded-2xl bg-gray-50 card-hover">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style="background:rgba(77,200,216,.1)">✉️</div>
+            <div>
+              <div class="text-xs font-bold uppercase tracking-widest mb-0.5" style="color:#aaa" data-key="contact.emailLabel"></div>
+              <a href="mailto:kz.iambala@gmail.com" class="font-medium text-sm hover:text-brand-teal transition-colors" style="color:#2D2D2D">kz.iambala@gmail.com</a>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 p-5 rounded-2xl bg-gray-50 card-hover">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style="background:rgba(77,200,216,.1)">📍</div>
+            <div>
+              <div class="text-xs font-bold uppercase tracking-widest mb-0.5" style="color:#aaa" data-key="contact.locLabel"></div>
+              <span class="font-medium text-sm" style="color:#2D2D2D" data-key="contact.location"></span>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 p-5 rounded-2xl bg-gray-50 card-hover">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style="background:rgba(77,200,216,.1)">📸</div>
+            <div>
+              <div class="text-xs font-bold uppercase tracking-widest mb-0.5" style="color:#aaa" data-key="contact.igLabel"></div>
+              <a href="https://instagram.com/workshop_iambala_" target="_blank" class="font-medium text-sm" style="color:#2D2D2D">@workshop_iambala_</a>
+            </div>
+          </div>
+          <!-- Coop tags -->
+          <div class="p-5 rounded-2xl bg-gray-50">
+            <p class="text-xs font-bold uppercase tracking-widest mb-3" style="color:#aaa" data-key="contact.coop"></p>
+            <div class="flex flex-wrap gap-2" id="coop-tags"></div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="rounded-2xl p-8" style="background:#F9FAFB">
+          <form id="contact-form" onsubmit="submitForm(event)" class="space-y-5">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5" data-key="contact.formName"></label>
+              <input type="text" required class="w-full px-4 py-3 rounded-xl text-sm bg-white text-gray-800" style="border:1.5px solid #e5e7eb" data-ph="contact.formName">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5" data-key="contact.formEmail"></label>
+              <input type="email" required class="w-full px-4 py-3 rounded-xl text-sm bg-white text-gray-800" style="border:1.5px solid #e5e7eb" data-ph="contact.formEmail">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5" data-key="contact.formMsg"></label>
+              <textarea rows="5" required class="w-full px-4 py-3 rounded-xl text-sm bg-white text-gray-800" style="border:1.5px solid #e5e7eb;resize:none" data-ph="contact.formMsg"></textarea>
+            </div>
+            <button type="submit" class="w-full py-3.5 rounded-xl text-white font-semibold transition-all" style="background:#4DC8D8;font-family:Nunito,sans-serif;cursor:pointer;border:none;font-size:15px" onmouseover="this.style.background='#3ab8c8'" onmouseout="this.style.background='#4DC8D8'" data-key="contact.formBtn"></button>
+          </form>
+          <div id="form-success" class="hidden flex-col items-center justify-center text-center py-16 gap-4">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center text-4xl" style="background:rgba(141,198,63,.1)">✅</div>
+            <p class="font-semibold text-lg" style="color:#2D2D2D" data-key="contact.formOk"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+<footer style="background:#0d1f23;color:#fff" class="py-14 relative overflow-hidden">
+  <div class="absolute top-0 left-1/4 w-32 h-32 rounded-full" style="background:rgba(77,200,216,.08);transform:translateY(-50%)"></div>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-8">
+      <p class="text-sm italic" style="color:rgba(255,255,255,.3)" data-key="footer.quote"></p>
+    </div>
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6 pt-6" style="border-top:1px solid rgba(255,255,255,.1)">
+      <div class="flex items-center gap-3">
+        <svg width="40" height="40" viewBox="0 0 44 44" fill="none"><circle cx="15" cy="26" r="13" fill="#4DC8D8" fill-opacity=".93"/><circle cx="29" cy="26" r="13" fill="#8DC63F" fill-opacity=".93"/><circle cx="22" cy="14" r="13" fill="#F7941D" fill-opacity=".88"/></svg>
+        <div>
+          <div class="text-xl font-bold" style="font-family:'Playfair Display',serif">IamBALA</div>
+          <div class="text-xs" style="color:rgba(255,255,255,.4)" data-key="footer.tagline"></div>
+        </div>
+      </div>
+      <div class="text-center">
+        <div class="text-sm" style="color:rgba(255,255,255,.35)" data-key="footer.rights"></div>
+        <div class="text-xs mt-1" style="color:rgba(255,255,255,.25)" data-key="footer.city"></div>
+      </div>
+      <div class="flex items-center gap-2 text-xs" style="color:rgba(255,255,255,.3)">
+        <span>kz.iambala@gmail.com</span>
+        <div class="flex gap-1 ml-2">
+          <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:#4DC8D8"></span>
+          <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:#8DC63F"></span>
+          <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:#F7941D"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════ SCRIPT ═══════════════════════════════ -->
+<script>
+// ─── TRANSLATIONS ───────────────────────────────────────────────────────────
+const T = {
+  ru: {
+    nameNote: '"bala" — ребёнок (каз.) + "I am" — «Я есть» (англ.)',
+    nav: { mission:'Миссия', programs:'Программы', team:'Команда', contact:'Контакты' },
+    hero: {
+      foundation: 'Общественный Фонд · г. Шымкент, Казахстан',
+      tagline: '«Я есть, я могу, я нужен»',
+      mission: 'Мы создаём инклюзивное общество, в котором каждый человек — независимо от возраста, способностей или обстоятельств — имеет равный доступ к образованию, развитию, здоровью и достойной жизни.',
+      cta: 'Узнать больше', ctaContact: 'Связаться с нами', partners: 'Партнёры и грантодатели',
+    },
+    missionSec: {
+      label:'Зачем мы существуем', title:'Наша миссия',
+      text:'Мы работаем с детьми с ОВЗ и их семьями, пожилыми людьми, беженцами и всеми в уязвимом положении — не как благотворители, а как партнёры на пути к полноценному участию в жизни общества. Каждый ребёнок имеет право сказать: «Я есть, я могу, я нужен».',
+      visionLabel:'Наше видение к 2028 году',
+      vision:'«Казахстан, в котором каждый ребёнок знает: «Я есть, я могу, я нужен». ОФ «IamBALA» — признанный национальный фонд, работающий в 5+ городах с 1 000+ благополучателями в год к 2028 году.»',
+      stat1:'4', stat1Label:'завершённых проекта',
+      stat2:'100+', stat2Label:'прямых благополучателей',
+      stat3:'15 000+', stat3Label:'онлайн-просмотров',
+    },
+    values: {
+      label:'Что нами движет', title:'Ценности',
+      items:[
+        {name:'Достоинство', icon:'💛', text:'Каждый человек ценен вне зависимости от способностей и статуса.'},
+        {name:'Инклюзия', icon:'🤲', text:'Общество становится сильнее, когда принимает каждого.'},
+        {name:'Доказательность', icon:'🔬', text:'Решения, основанные на данных и лучших практиках.'},
+        {name:'Партнёрство', icon:'🤝', text:'Семья, специалисты и сообщество работают как единая команда.'},
+        {name:'Расширение возможностей', icon:'🚀', text:'Мы не опекаем — мы создаём условия для самостоятельности.'},
+        {name:'Устойчивость', icon:'🌱', text:'Долгосрочный эффект важнее быстрого результата.'},
+      ],
+    },
+    programs: {
+      label:'Наш опыт', title:'Реализованные проекты',
+      items:[
+        {title:'Творчество без границ', sub:'Инклюзивное творческое пространство', text:'Инклюзивные мастер-классы по живописи, лепке и ДПИ в смешанных группах. Публичная выставка работ участников.', icon:'🎨', accent:'#4DC8D8', result:'60 участников · 8 мастер-классов', budget:'1 000 000 ₸'},
+        {title:'Гармония развития', sub:'Обучение и поддержка семей', text:'Тренинги для родителей по сенсорной интеграции, ABA-терапии, правам семей и взаимодействию со специалистами.', icon:'🤝', accent:'#8DC63F', result:'10 обучающих модулей', budget:'705 000 ₸'},
+        {title:'Играя развиваемся', sub:'Видео-инициатива', text:'Обучающие видеоролики по инклюзивным игровым методикам для родителей и специалистов. Открытый бесплатный доступ.', icon:'🎬', accent:'#F7941D', result:'15 000 просмотров · 12 детей', budget:'430 000 ₸'},
+        {title:'Цифровая инклюзия', sub:'ИИ-грамотность', text:'Онлайн-программа по практическому применению ИИ для родителей и НПО. PDF-гид «30 дней с ИИ».', icon:'💻', accent:'#F15A29', result:'25 участников · онлайн', budget:'1 000 000 ₸'},
+      ],
+    },
+    strategy: {
+      label:'Стратегия', title:'Программы 2026–2028', subtitle:'Четыре стратегических направления развития',
+      items:[
+        {title:'Инклюзивное образование', desc:'Ранняя помощь детям с ОВЗ, сопровождение семей, центр компетенций по инклюзии.', target:'400+ семей / год', icon:'📚'},
+        {title:'Цифровая инклюзия', desc:'ИИ-грамотность, цифровые навыки и ассистивные технологии для детей, родителей и НКО.', target:'200+ участников / год', icon:'💻'},
+        {title:'Творчество и арт-инклюзия', desc:'Мастер-классы, арт-терапия, инклюзивные культурные события и выставки.', target:'250+ участников / год', icon:'🎨'},
+        {title:'Спорт и активная жизнь', desc:'Адаптивный спорт, инклюзивные лагеря и оздоровительные программы.', target:'150+ участников / год', icon:'⚽'},
+      ],
+      roadmap:[
+        {year:'2026', value:'300+', label:'благополучателей'},
+        {year:'2027', value:'600+', label:'благополучателей'},
+        {year:'2028', value:'1 000+', label:'благополучателей'},
+      ],
+      funding:'Источники финансирования',
+      funders:['ГСЗ (акимат)','ЭРА-KZ','ЮНИСЕФ','Soros-KZ','Halyk Foundation','Kaspi Bank'],
+    },
+    team: {
+      label:'Люди за миссией', title:'Наша команда',
+      members:[
+        {name:'Даниярова Шолпан Бахт-Полатовна', title:'Директор', bio:'Директор ОФ «IamBALA». Руководит всеми программами фонда: инклюзивное образование, поддержка семей, цифровое развитие. Инициатор проектов «Гармония развития» и «Цифровая инклюзия».', ig:'@dr.shlpandaniyarova', featured:true},
+        {name:'Даниярова Аманкул Жуманазаровна', title:'Учредитель', bio:'Со-основатель ОФ «IamBALA». Участвует в стратегическом развитии фонда и продвижении инклюзивных практик в Казахстане.', ig:null, featured:false},
+        {name:'Подольская Татьяна Алымжановна', title:'Учредитель', bio:'Со-основатель ОФ «IamBALA». Поддерживает миссию фонда по расширению возможностей уязвимых групп.', ig:null, featured:false},
+      ],
+      regInfo:{label:'Правовая информация', date:'Зарегистрирован: 5 октября 2022 г.', bin:'БИН: 221040005731', addr:'Шымкент, Аль-Фарабийский р-н, ул. Жангельдина 17/2'},
+    },
+    contact: {
+      label:'Напишите нам', title:'Связаться с нами', subtitle:'Открыты для партнёрства, финансирования и сотрудничества',
+      emailLabel:'Email', locLabel:'Адрес', location:'г. Шымкент, ул. Жангельдина 17/2', igLabel:'Instagram',
+      coop:'Направления сотрудничества', coopItems:['Грантовая поддержка','Корпоративное КСО','Экспертиза и методика','Волонтёрство'],
+      formName:'Ваше имя', formEmail:'Ваш email', formMsg:'Сообщение', formBtn:'Отправить', formOk:'Спасибо! Мы свяжемся с вами в ближайшее время.',
+    },
+    footer: {
+      quote:'«Каждый ребёнок имеет право сказать: я есть, я могу, я нужен.»',
+      rights:'© 2022–2026 Общественный Фонд «IamBALA»', city:'г. Шымкент, Казахстан', tagline:'Я есть · Мен бармын · I am',
+    },
+  },
+  en: {
+    nameNote: '"bala" — child (Kaz.) + "I am" (Eng.)',
+    nav: { mission:'Mission', programs:'Programs', team:'Team', contact:'Contact' },
+    hero: {
+      foundation:'Public Foundation · Shymkent, Kazakhstan',
+      tagline:'"I am, I can, I matter"',
+      mission:'We build an inclusive society where every person — regardless of age, ability, or circumstance — has equal access to education, development, healthcare, and a dignified life.',
+      cta:'Learn More', ctaContact:'Contact Us', partners:'Partners & Grantors',
+    },
+    missionSec: {
+      label:'Why We Exist', title:'Our Mission',
+      text:'We work with children with disabilities and their families, elderly people, refugees, and all those in vulnerable situations — not as benefactors, but as partners toward full participation in society. Every child has the right to say: "I am, I can, I matter."',
+      visionLabel:'Our Vision for 2028',
+      vision:'"A Kazakhstan where every child knows: «I am, I can, I matter.» IamBALA — a recognized national foundation operating in 5+ cities with 1,000+ beneficiaries per year by 2028."',
+      stat1:'4', stat1Label:'completed projects',
+      stat2:'100+', stat2Label:'direct beneficiaries',
+      stat3:'15,000+', stat3Label:'online views',
+    },
+    values: {
+      label:'What drives us', title:'Values',
+      items:[
+        {name:'Dignity', icon:'💛', text:'Every person is valued regardless of their abilities or status.'},
+        {name:'Inclusion', icon:'🤲', text:'Society grows stronger when it welcomes everyone.'},
+        {name:'Evidence-based', icon:'🔬', text:'Decisions grounded in data and best practices.'},
+        {name:'Partnership', icon:'🤝', text:'Families, specialists, and communities work as one team.'},
+        {name:'Empowerment', icon:'🚀', text:'We don\'t patronize — we create conditions for independence.'},
+        {name:'Sustainability', icon:'🌱', text:'Long-term impact matters more than quick results.'},
+      ],
+    },
+    programs: {
+      label:'Our Track Record', title:'Completed Projects',
+      items:[
+        {title:'Creativity Without Limits', sub:'Inclusive Creative Space', text:'Inclusive master classes in painting, sculpture, and applied arts. Mixed groups — people with and without disabilities together.', icon:'🎨', accent:'#4DC8D8', result:'60 participants · 8 master classes', budget:'1,000,000 ₸'},
+        {title:'Harmony of Development', sub:'Family Training & Support', text:'Trainings for parents on sensory integration, ABA therapy, family rights, and working with specialists.', icon:'🤝', accent:'#8DC63F', result:'10 training modules', budget:'705,000 ₸'},
+        {title:'Developing Through Play', sub:'Video Initiative', text:'Educational video series on inclusive play-based methods for parents and specialists. Free open access.', icon:'🎬', accent:'#F7941D', result:'15,000 views · 12 children', budget:'430,000 ₸'},
+        {title:'Digital Inclusion', sub:'AI Literacy', text:'Online program on practical AI tools for parents and NGOs. PDF guide «30 Days with AI».', icon:'💻', accent:'#F15A29', result:'25 participants · online', budget:'1,000,000 ₸'},
+      ],
+    },
+    strategy: {
+      label:'Strategy', title:'Programs 2026–2028', subtitle:'Four strategic directions for development',
+      items:[
+        {title:'Inclusive Education', desc:'Early support for children with disabilities, family accompaniment, and an inclusion competency center.', target:'400+ families / year', icon:'📚'},
+        {title:'Digital Inclusion', desc:'AI literacy, digital skills, and assistive technologies for children, parents, and NGOs.', target:'200+ participants / year', icon:'💻'},
+        {title:'Arts & Culture', desc:'Master classes, art therapy, inclusive cultural events and exhibitions.', target:'250+ participants / year', icon:'🎨'},
+        {title:'Sport & Active Life', desc:'Adaptive sports, inclusive camps, and wellness programs.', target:'150+ participants / year', icon:'⚽'},
+      ],
+      roadmap:[
+        {year:'2026', value:'300+', label:'beneficiaries'},
+        {year:'2027', value:'600+', label:'beneficiaries'},
+        {year:'2028', value:'1,000+', label:'beneficiaries'},
+      ],
+      funding:'Funding Sources',
+      funders:['State Social Orders','ERA-KZ','UNICEF','Soros-KZ','Halyk Foundation','Kaspi Bank'],
+    },
+    team: {
+      label:'People Behind the Mission', title:'Our Team',
+      members:[
+        {name:'Sholpan Daniyarova', title:'Director', bio:'Director of IamBALA Public Foundation. Leads all programs in inclusive education, family support, and digital inclusion. Initiator of "Harmony of Development" and "Digital Inclusion" projects.', ig:'@dr.shlpandaniyarova', featured:true},
+        {name:'Amankul Daniyarova', title:'Co-Founder', bio:'Co-founder of IamBALA. Involved in strategic development and promotion of inclusive practices in Kazakhstan.', ig:null, featured:false},
+        {name:'Tatyana Podolskaya', title:'Co-Founder', bio:'Co-founder of IamBALA. Supports the foundation\'s development and its mission to expand opportunities for vulnerable populations.', ig:null, featured:false},
+      ],
+      regInfo:{label:'Legal Information', date:'Registered: 5 October 2022', bin:'BIN: 221040005731', addr:'Shymkent, Al-Farabi district, Zhangeldin St. 17/2'},
+    },
+    contact: {
+      label:'Get In Touch', title:'Contact Us', subtitle:'Open for partnership, funding, and collaboration',
+      emailLabel:'Email', locLabel:'Address', location:'Shymkent, Zhangeldin St. 17/2', igLabel:'Instagram',
+      coop:'Ways to Collaborate', coopItems:['Grant Support','Corporate CSR','Expert Mentoring','Volunteering'],
+      formName:'Your Name', formEmail:'Your Email', formMsg:'Message', formBtn:'Send Message', formOk:'Thank you! We will be in touch shortly.',
+    },
+    footer: {
+      quote:'"Every child has the right to say: I am, I can, I matter."',
+      rights:'© 2022–2026 IamBALA Public Foundation', city:'Shymkent, Kazakhstan', tagline:'Я есть · Мен бармын · I am',
+    },
+  },
+  kz: {
+    nameNote: '"bala" — бала (қаз.) + "I am" — «Мен бармын» (ағыл.)',
+    nav: { mission:'Миссия', programs:'Бағдарламалар', team:'Команда', contact:'Байланыс' },
+    hero: {
+      foundation:'Қоғамдық Қор · Шымкент, Қазақстан',
+      tagline:'«Мен бармын, мен істей аламын, мен керекпін»',
+      mission:'Біз инклюзивті қоғам қалыптастырамыз — онда әрбір адам жасына, мүмкіндіктеріне немесе жағдайына қарамастан білімге, дамуға, денсаулыққа және лайықты өмірге тең қол жеткізе алады.',
+      cta:'Толығырақ', ctaContact:'Байланысу', partners:'Серіктестер мен грантодатушылар',
+    },
+    missionSec: {
+      label:'Неге бар болдық', title:'Біздің миссиямыз',
+      text:'Біз мүгедектігі бар балалармен және олардың отбасыларымен, қарт адамдармен, босқындармен және барлық осал топтармен жұмыс істейміз — қамқоршылар ретінде емес, қоғамға толыққанды қатысуға жол ашатын серіктестер ретінде.',
+      visionLabel:'2028 жылға арналған ой-арманымыз',
+      vision:'Қазақстан, онда әрбір бала «Мен бармын, мен істей аламын, мен керекпін» деп біледі. «IamBALA» — 2028 жылға қарай 5+ қалада жылына 1 000+ пайдаланушымен жұмыс істейтін мойындалған ұлттық қор.',
+      stat1:'4', stat1Label:'жүзеге асырылған жоба',
+      stat2:'100+', stat2Label:'тікелей пайдаланушы',
+      stat3:'15 000+', stat3Label:'онлайн-көрініс',
+    },
+    values: {
+      label:'Бізді не қозғайды', title:'Құндылықтар',
+      items:[
+        {name:'Қадір-қасиет', icon:'💛', text:'Әрбір адам мүмкіндіктеріне немесе мәртебесіне қарамастан бағалы.'},
+        {name:'Инклюзия', icon:'🤲', text:'Қоғам барлығын қабылдаған кезде күшейеді.'},
+        {name:'Дәлелділік', icon:'🔬', text:'Шешімдер деректер мен үздік тәжірибелерге негізделеді.'},
+        {name:'Әріптестік', icon:'🤝', text:'Отбасы, мамандар және қауымдастық бір команда болып жұмыс істейді.'},
+        {name:'Мүмкіндіктерді кеңейту', icon:'🚀', text:'Біз қамқорлық жасамаймыз — тәуелсіздік үшін жағдай жасаймыз.'},
+        {name:'Тұрақтылық', icon:'🌱', text:'Ұзақ мерзімді әсер жылдам нәтижеден маңыздырақ.'},
+      ],
+    },
+    programs: {
+      label:'Біздің тәжірибеміз', title:'Жүзеге асырылған жобалар',
+      items:[
+        {title:'Шексіз шығармашылық', sub:'Инклюзивті шығармашылық кеңістік', text:'Сурет салу, мүсін және қолданбалы өнер бойынша инклюзивті шеберханалар. Мүгедектігі бар және онсыз адамдар бірге.', icon:'🎨', accent:'#4DC8D8', result:'60 қатысушы · 8 шеберхана', budget:'1 000 000 ₸'},
+        {title:'Дамудың үйлесімдігі', sub:'Отбасыларды оқыту', text:'Сенсорлық интеграция, ABA-терапия, отбасы құқықтары және мамандармен өзара іс-қимыл бойынша тренингтер.', icon:'🤝', accent:'#8DC63F', result:'10 оқу модулі', budget:'705 000 ₸'},
+        {title:'Ойнай дамимыз', sub:'Бейне бастама', text:'Ата-аналар мен мамандарға арналған инклюзивті ойындық әдістемелер бойынша оқыту бейнероликтері. Тегін ашық қолжетімділік.', icon:'🎬', accent:'#F7941D', result:'15 000 көрініс · 12 бала', budget:'430 000 ₸'},
+        {title:'Цифрлық инклюзия', sub:'ЖИ-сауаттылық', text:'Ата-аналар мен ҮЕҰ-ларға арналған ЖИ құралдарын пайдалану бойынша онлайн-бағдарлама. «ЖИ-мен 30 күн» PDF нұсқаулығы.', icon:'💻', accent:'#F15A29', result:'25 қатысушы · онлайн', budget:'1 000 000 ₸'},
+      ],
+    },
+    strategy: {
+      label:'Стратегия', title:'2026–2028 жылдарға арналған бағдарламалар', subtitle:'Дамудың төрт стратегиялық бағыты',
+      items:[
+        {title:'Инклюзивті білім беру', desc:'Мүгедектігі бар балаларға ерте көмек, отбасыларды сүйемелдеу, инклюзия бойынша құзыреттілік орталығы.', target:'Жылына 400+ отбасы', icon:'📚'},
+        {title:'Цифрлық инклюзия', desc:'Балалар, ата-аналар және ҮЕҰ-лар үшін ЖИ-сауаттылық, цифрлық дағдылар және ассистивті технологиялар.', target:'Жылына 200+ қатысушы', icon:'💻'},
+        {title:'Шығармашылық және арт-инклюзия', desc:'Шеберханалар, арт-терапия, инклюзивті мәдени іс-шаралар және көрмелер.', target:'Жылына 250+ қатысушы', icon:'🎨'},
+        {title:'Спорт және белсенді өмір', desc:'Бейімдеп алынған спорт, инклюзивті лагерьлер және сауықтыру бағдарламалары.', target:'Жылына 150+ қатысушы', icon:'⚽'},
+      ],
+      roadmap:[
+        {year:'2026', value:'300+', label:'пайдаланушы'},
+        {year:'2027', value:'600+', label:'пайдаланушы'},
+        {year:'2028', value:'1 000+', label:'пайдаланушы'},
+      ],
+      funding:'Қаржыландыру көздері',
+      funders:['МӘТ (Акимат)','ЭРА-KZ','ЮНИСЕФ','Soros-KZ','Halyk Foundation','Kaspi Bank'],
+    },
+    team: {
+      label:'Миссия артындағы адамдар', title:'Біздің команда',
+      members:[
+        {name:'Даниярова Шолпан Бахт-Полатовна', title:'Директор', bio:'«IamBALA» Қоғамдық Қорының директоры. Инклюзивті білім беру, отбасыларды қолдау және цифрлық даму саласындағы барлық бағдарламаларды басқарады.', ig:'@dr.shlpandaniyarova', featured:true},
+        {name:'Даниярова Аманкул Жуманазаровна', title:'Негізін қалаушы', bio:'«IamBALA» Қоғамдық Қорының негізін қалаушы. Қордың стратегиялық дамуына қатысады.', ig:null, featured:false},
+        {name:'Подольская Татьяна Алымжановна', title:'Негізін қалаушы', bio:'«IamBALA» Қоғамдық Қорының негізін қалаушы. Осал топтардың мүмкіндіктерін кеңейту миссиясын қолдайды.', ig:null, featured:false},
+      ],
+      regInfo:{label:'Құқықтық ақпарат', date:'Тіркелген: 5 қазан 2022 ж.', bin:'БСН: 221040005731', addr:'Шымкент, Әл-Фараби ауданы, Жангелдин к. 17/2'},
+    },
+    contact: {
+      label:'Хабарласыңыз', title:'Бізбен байланысыңыз', subtitle:'Серіктестік, қаржыландыру және ынтымақтастыққа ашықпыз',
+      emailLabel:'Email', locLabel:'Мекенжай', location:'Шымкент, Жангелдин к. 17/2', igLabel:'Instagram',
+      coop:'Ынтымақтастық бағыттары', coopItems:['Грант қолдауы','КӘЖ','Сараптамалық қолдау','Волонтерлік'],
+      formName:'Атыңыз', formEmail:'Email', formMsg:'Хабарлама', formBtn:'Жіберу', formOk:'Рахмет! Сізбен жақын арада байланысамыз.',
+    },
+    footer: {
+      quote:'«Әрбір баланың айтуға хақы бар: мен бармын, мен істей аламын, мен керекпін.»',
+      rights:'© 2022–2026 «IamBALA» Қоғамдық Қоры', city:'Шымкент, Қазақстан', tagline:'Я есть · Мен бармын · I am',
+    },
+  },
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let currentLang = 'ru';
+
+function get(key) {
+  const parts = key.split('.');
+  let v = T[currentLang];
+  for (const p of parts) v = v?.[p];
+  return v ?? '';
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  const t = T[currentLang];
+
+  // Simple text nodes
+  document.querySelectorAll('[data-key]').forEach(el => {
+    const v = get(el.dataset.key);
+    if (typeof v === 'string') el.textContent = v;
+  });
+
+  // Placeholder attributes
+  document.querySelectorAll('[data-ph]').forEach(el => {
+    el.placeholder = get(el.dataset.ph);
+  });
+
+  // Values grid
+  const vg = document.getElementById('values-grid');
+  const valColors = ['#4DC8D8','#8DC63F','#F7941D','#F15A29','#4DC8D8','#8DC63F'];
+  vg.innerHTML = t.values.items.map((item, i) => `
+    <div class="bg-white rounded-2xl p-7 shadow-sm card-hover relative overflow-hidden" style="cursor:default">
+      <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl mb-5" style="background:${valColors[i]}18">${item.icon}</div>
+      <h3 class="font-display text-base font-bold mb-2" style="color:#2D2D2D">${item.name}</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">${item.text}</p>
+      <div class="absolute bottom-0 left-0 right-0 h-0.5 opacity-0 transition-opacity duration-300" style="background:${valColors[i]}" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0"></div>
+    </div>
+  `).join('');
+
+  // Programs grid
+  const pg = document.getElementById('programs-grid');
+  pg.innerHTML = t.programs.items.map(c => `
+    <div class="bg-white rounded-2xl p-8 shadow-sm card-hover relative overflow-hidden" style="border:1px solid #f3f4f6;cursor:default">
+      <div class="absolute top-0 inset-x-0 h-1 rounded-t-2xl" style="background:${c.accent}"></div>
+      <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-6" style="background:${c.accent}14">${c.icon}</div>
+      <h3 class="font-display text-xl font-bold mb-1" style="color:#2D2D2D">${c.title}</h3>
+      <p class="text-xs font-bold uppercase tracking-wider mb-4" style="color:${c.accent}">${c.sub}</p>
+      <p class="text-gray-500 text-sm leading-relaxed mb-6">${c.text}</p>
+      <div class="flex items-center justify-between pt-4" style="border-top:1px solid #f3f4f6">
+        <span class="text-xs font-semibold text-gray-400">${c.result}</span>
+        <span class="text-xs font-bold" style="color:${c.accent}">${c.budget}</span>
+      </div>
+      <div class="absolute -bottom-8 -right-8 w-28 h-28 rounded-full" style="background:${c.accent};opacity:.06"></div>
+    </div>
+  `).join('');
+
+  // Strategy grid
+  const stratColors = ['#4DC8D8','#8DC63F','#F7941D','#F15A29'];
+  const sg = document.getElementById('strategy-grid');
+  sg.innerHTML = t.strategy.items.map((item, i) => `
+    <div class="rounded-2xl p-6 card-hover" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);cursor:default">
+      <div class="text-3xl mb-4">${item.icon}</div>
+      <h3 class="font-display text-base font-bold text-white mb-2">${item.title}</h3>
+      <p class="text-sm leading-relaxed mb-4" style="color:rgba(255,255,255,.6)">${item.desc}</p>
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white" style="background:${stratColors[i]}50">🎯 ${item.target}</span>
+    </div>
+  `).join('');
+
+  // Roadmap
+  const rg = document.getElementById('roadmap-grid');
+  rg.innerHTML = t.strategy.roadmap.map(r => `
+    <div class="text-center rounded-2xl p-6" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1)">
+      <div class="text-xs font-bold uppercase tracking-widest mb-2" style="color:rgba(255,255,255,.5)">${r.year}</div>
+      <div class="font-display text-4xl font-bold text-white mb-1">${r.value}</div>
+      <div class="text-xs" style="color:rgba(255,255,255,.5)">${r.label}</div>
+    </div>
+  `).join('');
+
+  // Funders
+  document.getElementById('funders-list').innerHTML = t.strategy.funders.map(f =>
+    `<span class="font-semibold text-sm" style="color:rgba(255,255,255,.5)">${f}</span>`
+  ).join('');
+
+  // Team grid
+  const [featured, ...others] = t.team.members;
+  const ri = t.team.regInfo;
+  document.getElementById('team-grid').innerHTML = `
+    <!-- Featured director -->
+    <div class="bg-white rounded-3xl p-8 shadow-sm card-hover" style="border:1px solid #f3f4f6">
+      <div class="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+        <div class="relative flex-shrink-0">
+          <div class="w-28 h-28 rounded-full flex items-center justify-center" style="background:linear-gradient(135deg,#4DC8D8,#065968);box-shadow:0 0 0 4px rgba(77,200,216,.2)">
+            <span style="font-size:52px">👩‍💼</span>
+          </div>
+          <div class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full border-2 border-white flex items-center justify-center text-white font-bold shadow" style="background:#8DC63F;font-size:14px">✓</div>
+        </div>
+        <div class="text-center sm:text-left">
+          <h3 class="font-display text-xl font-bold mb-0.5" style="color:#2D2D2D">${featured.name}</h3>
+          <p class="font-semibold text-sm mb-4" style="color:#4DC8D8">${featured.title}</p>
+          <p class="text-gray-500 text-sm leading-relaxed mb-4">${featured.bio}</p>
+          ${featured.ig ? `<a href="#" class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-brand-teal transition-colors">📸 ${featured.ig}</a>` : ''}
+        </div>
+      </div>
+    </div>
+    <!-- Right column -->
+    <div class="flex flex-col gap-5">
+      ${others.map((m, i) => `
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover" style="border:1px solid #f3f4f6">
+          <div class="flex items-start gap-5">
+            <div class="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#f3f4f6,#e5e7eb)">
+              <span style="font-size:28px">${['👩','👩‍💻'][i]}</span>
+            </div>
+            <div>
+              <h4 class="font-display text-base font-bold mb-0.5" style="color:#2D2D2D">${m.name}</h4>
+              <p class="text-xs font-semibold mb-2" style="color:#F7941D">${m.title}</p>
+              <p class="text-gray-500 text-xs leading-relaxed">${m.bio}</p>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+      <div class="rounded-2xl p-5 space-y-1.5" style="background:linear-gradient(135deg,rgba(77,200,216,.08),rgba(141,198,63,.08));border:1px solid rgba(77,200,216,.15)">
+        <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#4DC8D8">${ri.label}</p>
+        <p class="text-gray-600 text-xs">📅 ${ri.date}</p>
+        <p class="text-gray-600 text-xs">🔢 ${ri.bin}</p>
+        <p class="text-gray-600 text-xs">📍 ${ri.addr}</p>
+      </div>
+    </div>
+  `;
+
+  // Contact coop tags
+  const coopColors = ['#4DC8D8','#8DC63F','#F7941D','#F15A29'];
+  document.getElementById('coop-tags').innerHTML = t.contact.coopItems.map((item, i) =>
+    `<span class="px-3 py-1 rounded-full text-xs font-semibold text-white" style="background:${coopColors[i]}">${item}</span>`
+  ).join('');
+
+  // Form success message
+  const formOkEl = document.querySelector('#form-success [data-key="contact.formOk"]');
+  if (formOkEl) formOkEl.textContent = t.contact.formOk;
+
+  // Scrolled header state
+  updateHeaderState();
+}
+
+// ─── LANG ────────────────────────────────────────────────────────────────────
+function setLang(l) {
+  currentLang = l;
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.textContent === l.toUpperCase()) btn.classList.add('active');
+  });
+  render();
+}
+
+// ─── HEADER SCROLL ───────────────────────────────────────────────────────────
+function updateHeaderState() {
+  const header = document.getElementById('header');
+  const isScrolled = window.scrollY > 24;
+  if (isScrolled) {
+    header.style.background = 'rgba(255,255,255,.97)';
+    header.style.boxShadow = '0 1px 8px rgba(0,0,0,.08)';
+    document.getElementById('logo-name').style.color = '#2D2D2D';
+    document.getElementById('logo-note').style.color = '#9ca3af';
+    document.getElementById('lang-wrap').style.background = '#f3f4f6';
+    document.querySelectorAll('.nav-link').forEach(el => el.style.color = '#6b7280');
+    document.querySelectorAll('.ham-line').forEach(el => el.style.background = '#374151');
+    document.querySelectorAll('.lang-btn').forEach(el => {
+      el.classList.add('scrolled');
+    });
+  } else {
+    header.style.background = 'transparent';
+    header.style.boxShadow = 'none';
+    document.getElementById('logo-name').style.color = '#fff';
+    document.getElementById('logo-note').style.color = 'rgba(255,255,255,.6)';
+    document.getElementById('lang-wrap').style.background = 'rgba(255,255,255,.2)';
+    document.querySelectorAll('.nav-link').forEach(el => el.style.color = 'rgba(255,255,255,.85)');
+    document.querySelectorAll('.ham-line').forEach(el => el.style.background = '#fff');
+    document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('scrolled'));
+  }
+}
+window.addEventListener('scroll', updateHeaderState, { passive: true });
+
+// ─── MOBILE MENU ─────────────────────────────────────────────────────────────
+function toggleMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('ham-btn');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+// ─── SCROLL TO ───────────────────────────────────────────────────────────────
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── FORM SUBMIT ─────────────────────────────────────────────────────────────
+function submitForm(e) {
+  e.preventDefault();
+  document.getElementById('contact-form').style.display = 'none';
+  const success = document.getElementById('form-success');
+  success.classList.remove('hidden');
+  success.style.display = 'flex';
+}
+
+// ─── INTERSECTION OBSERVER ───────────────────────────────────────────────────
+const obs = new IntersectionObserver(
+  entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }),
+  { threshold: 0.1 }
+);
+document.querySelectorAll('.fade-section').forEach(el => obs.observe(el));
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
