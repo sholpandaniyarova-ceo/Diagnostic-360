@@ -1,4 +1,4 @@
-import { Playfair_Display, DM_Sans } from 'next/font/google';
+import { Playfair_Display, Nunito } from 'next/font/google';
 import './globals.css';
 
 const playfair = Playfair_Display({
@@ -8,7 +8,7 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
-const dmSans = DM_Sans({
+const nunito = Nunito({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['latin', 'cyrillic'],
   variable: '--font-sans',
@@ -16,21 +16,21 @@ const dmSans = DM_Sans({
 });
 
 export const metadata = {
-  title: 'IamBALA — Children\'s Neurodevelopmental Foundation | Казахстан',
+  title: 'IamBALA — Общественный Фонд | Шымкент, Казахстан',
   description:
-    'IamBALA Public Foundation improves developmental outcomes for children with autism, cerebral palsy, and developmental delays in Central Asia through early diagnosis, evidence-based rehabilitation, and specialist training.',
+    'ОФ «IamBALA» развивает инклюзивное общество в Казахстане, наделяя детей с особенностями развития, их семьи и всех людей в уязвимом положении знаниями, инструментами и силой.',
   keywords:
-    'IamBALA, neurodevelopmental, autism, cerebral palsy, Kazakhstan, Shymkent, early intervention, Basqa Development Space, Diagnostic 360, детский невролог',
+    'IamBALA, инклюзия, дети с ОВЗ, Казахстан, Шымкент, инклюзивное образование, творчество, цифровая инклюзия, НКО, общественный фонд',
   openGraph: {
-    title: 'IamBALA Public Foundation',
-    description: 'Improving lives of children with neurodevelopmental disorders in Central Asia.',
+    title: 'IamBALA — Я есть · Мен бармын · I am',
+    description: 'Инклюзивное общество для каждого ребёнка в Казахстане.',
     type: 'website',
   },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ru" className={`${playfair.variable} ${dmSans.variable}`}>
+    <html lang="ru" className={`${playfair.variable} ${nunito.variable}`}>
       <body className="font-sans text-brand-text bg-white antialiased">
         {children}
       </body>
