@@ -245,7 +245,8 @@ const T = {
       f1: '15–25 минут. Без регистрации.',
       f2: '6 доменов: моторика, речь, когниция, сенсорика, поведение, социальное.',
       f3: 'Автоматический отчёт с уровнем риска и маршрутом к специалисту.',
-      start: 'Начать скрининг →'
+      start: 'Начать скрининг →',
+      mchat: 'M-CHAT-R: скрининг риска аутизма (16–30 мес) →'
     },
     child: {
       title: 'Данные о ребёнке',
@@ -293,7 +294,8 @@ const T = {
       f1: '15–25 минут. Тіркеусіз.',
       f2: '6 сала: моторика, сөйлеу, таным, сенсорика, мінез-құлық, әлеуметтік.',
       f3: 'Тәуекел деңгейі мен маман ұсынымдарын қамтитын автоматты есеп.',
-      start: 'Скринингті бастау →'
+      start: 'Скринингті бастау →',
+      mchat: 'M-CHAT-R: аутизм қаупінің скринингі (16–30 ай) →'
     },
     child: {
       title: 'Баланың деректері',
@@ -341,7 +343,8 @@ const T = {
       f1: '15–25 minutes. No registration required.',
       f2: '6 domains: motor, speech, cognition, sensory, behavior, social.',
       f3: 'Automatic report with risk level and referral pathway.',
-      start: 'Start Screening →'
+      start: 'Start Screening →',
+      mchat: 'M-CHAT-R: autism risk screening (16–30 mo) →'
     },
     child: {
       title: 'Child Information',
@@ -596,6 +599,7 @@ function screenWelcome() {
       <div class="feature"><span class="feature-icon">📊</span><span class="feature-text">${t('welcome.f3')}</span></div>
     </div>
     <button class="btn btn-primary" onclick="goTo('child')">${t('welcome.start')}</button>
+    <button class="btn btn-secondary" onclick="location.href='mchat.html'">${t('welcome.mchat')}</button>
     <p class="footer-note">Basqa Development Space · ТОО Neurotech Solutions · Шымкент, Казахстан</p>
   </div>`;
 }

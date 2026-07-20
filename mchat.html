@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>M-CHAT-R — Скрининг риска аутизма · Diagnostic 360</title>
+  <style>
+    :root {
+      --bg: #F7F8FA;
+      --card: #FFFFFF;
+      --ink: #1A1F36;
+      --muted: #6B7280;
+      --border: #E5E7EB;
+      --brand: #1F3864;
+      --brand-light: #2E5BAA;
+      --green: #2E7D32;
+      --green-bg: #E8F5E9;
+      --yellow: #E65100;
+      --yellow-bg: #FFF3E0;
+      --red: #C62828;
+      --red-bg: #FFEBEE;
+      --shadow: 0 2px 12px rgba(26,31,54,0.08);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* NAV */
+    .nav {
+      padding: 12px 16px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .nav-logo {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--brand-light), var(--brand));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;
+    }
+    .nav-title { font-weight: 700; font-size: 14px; flex: 1; }
+    .nav-sub { font-size: 10px; color: var(--muted); }
+    .lang-switcher { display: flex; gap: 3px; }
+    .lang-btn {
+      padding: 3px 7px; border-radius: 6px;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--muted); font-size: 11px; font-weight: 700;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+    }
+    .lang-btn.active { background: var(--brand); color: white; border-color: var(--brand); }
+
+    /* PROGRESS */
+    .progress-wrap { background: var(--border); height: 3px; }
+    .progress-bar { height: 100%; background: var(--brand); transition: width .3s ease; }
+
+    /* CONTENT */
+    .content { flex: 1; padding: 24px 20px 48px; }
+
+    /* BUTTONS */
+    .btn {
+      display: block; width: 100%;
+      padding: 14px 20px; border-radius: 10px;
+      border: none; font-family: inherit;
+      font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: all .15s; text-align: center;
+    }
+    .btn-primary { background: var(--brand); color: white; }
+    .btn-primary:hover { background: #26437a; }
+    .btn-secondary {
+      background: var(--card); color: var(--ink);
+      border: 1.5px solid var(--border); margin-top: 10px;
+    }
+    .btn-secondary:hover { background: var(--bg); }
+
+    /* WELCOME */
+    .welcome-logo {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: linear-gradient(135deg, var(--brand-light), var(--brand));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 800; font-size: 22px;
+      margin-bottom: 20px;
+    }
+    .welcome-title { font-size: 26px; font-weight: 700; color: var(--brand); margin-bottom: 10px; }
+    .welcome-desc { color: var(--muted); font-size: 15px; margin-bottom: 22px; line-height: 1.6; }
+    .features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .feature { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; }
+    .feature-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .feature-text { color: var(--muted); }
+
+    /* FORM */
+    .section-h { margin-bottom: 20px; }
+    .section-h h2 { font-size: 21px; font-weight: 700; margin-bottom: 4px; }
+    .section-h p { font-size: 14px; color: var(--muted); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+    .req { color: var(--red); margin-left: 3px; }
+    .form-input {
+      width: 100%; padding: 12px 14px;
+      border-radius: 8px; border: 1.5px solid var(--border);
+      font-family: inherit; font-size: 15px; color: var(--ink);
+      background: var(--card); transition: border-color .15s;
+      -webkit-appearance: none;
+    }
+    .form-input:focus { outline: none; border-color: var(--brand); }
+    .form-hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+    /* QUIZ */
+    .q-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .domain-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 999px;
+      background: #DDEBF7; color: var(--brand);
+      font-size: 12px; font-weight: 600;
+    }
+    .q-counter { font-size: 12px; color: var(--muted); }
+    .q-text { font-size: 19px; font-weight: 500; line-height: 1.45; margin-bottom: 28px; }
+    .ans-btn {
+      display: block; width: 100%;
+      padding: 14px 16px; border-radius: 10px;
+      border: 1.5px solid var(--border); background: var(--card);
+      font-family: inherit; font-size: 15px; font-weight: 500;
+      cursor: pointer; text-align: left; transition: all .15s;
+      margin-bottom: 10px; color: var(--ink);
+    }
+    .ans-btn:hover { border-color: var(--brand); background: #EFF4FC; }
+    .ans-btn.yes:hover { border-color: var(--green); background: var(--green-bg); }
+    .ans-btn.no:hover { border-color: var(--red); background: var(--red-bg); }
+
+    /* REPORT */
+    .report-center { text-align: center; margin-bottom: 22px; }
+    .report-light {
+      width: 88px; height: 88px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; margin: 0 auto 14px;
+    }
+    .light-green { background: var(--green); }
+    .light-yellow { background: var(--yellow); }
+    .light-red { background: var(--red); }
+    .report-lvl { font-size: 22px; font-weight: 700; margin-bottom: 5px; }
+    .lvl-green { color: var(--green); }
+    .lvl-yellow { color: var(--yellow); }
+    .lvl-red { color: var(--red); }
+    .report-meta { font-size: 13px; color: var(--muted); }
+    .rec {
+      padding: 14px 16px; border-radius: 10px;
+      font-size: 14px; line-height: 1.6; margin-bottom: 18px;
+    }
+    .rec-green { background: var(--green-bg); color: #1B5E20; }
+    .rec-yellow { background: var(--yellow-bg); color: #7F3B00; }
+    .rec-red { background: var(--red-bg); color: #7F0000; }
+    .domains-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+    .sc-green { color: var(--green); }
+    .sc-yellow { color: var(--yellow); }
+    .sc-red { color: var(--red); }
+
+    .disclaimer {
+      padding: 12px 14px; border-radius: 8px;
+      background: #F3F4F6; border: 1px solid var(--border);
+      font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 20px;
+    }
+    .footer-note { text-align: center; font-size: 11px; color: var(--muted); margin-top: 16px; }
+
+    /* PRINT */
+    @media print {
+      body { background: white; }
+      #app { max-width: 100%; }
+      .nav { position: static; }
+      .lang-switcher, .progress-wrap, .btn, .ans-btn, .no-print { display: none !important; }
+      .print-report { display: block !important; }
+    }
+    .print-report { display: none; }
+    .print-domain-row { display: flex; gap: 8px; font-size: 13px; padding: 4px 0; border-bottom: 1px solid #eee; }
+
+    /* M-CHAT-R specific */
+    .age-warn {
+      padding: 12px 14px; border-radius: 8px;
+      background: var(--yellow-bg); color: #7F3B00;
+      font-size: 13px; line-height: 1.6; margin-bottom: 16px;
+      border: 1px solid #FFE0B2;
+    }
+    .flag-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .flag-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 10px 14px; border-radius: 8px;
+      background: var(--card); border: 1px solid var(--border);
+      font-size: 13px; line-height: 1.5;
+    }
+    .flag-num {
+      flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+      background: var(--red-bg); color: var(--red);
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .score-big { font-size: 15px; font-weight: 700; margin-top: 2px; }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+const S = { lang:'ru', childAge:null, childName:'', qIdx:0, answers:{}, screen:'welcome' };
+
+// Items where YES is the risk response (official M-CHAT-R reverse items)
+const REVERSE = new Set([2, 5, 12]);
+
+// ─────────────────────────────────────────
+// TRANSLATIONS
+// ─────────────────────────────────────────
+const T = {
+  ru: {
+    appName: 'M-CHAT-R', appSub: 'Скрининг риска аутизма · 16–30 мес',
+    welcome: {
+      title: 'Скрининг M-CHAT-R',
+      desc: 'M-CHAT-R — международный валидированный опросник для раннего выявления риска расстройств аутистического спектра у детей 16–30 месяцев. 20 вопросов «Да/Нет», около 5 минут, без регистрации.',
+      f1: '≈5 минут · 20 вопросов «Да / Нет».',
+      f2: 'Для детей от 16 до 30 месяцев.',
+      f3: 'Результат с уровнем риска и рекомендациями по официальному алгоритму.',
+      disc: 'Это скрининговый, а не диагностический инструмент. Результат не является диагнозом.',
+      start: 'Начать скрининг →'
+    },
+    child: {
+      title: 'Данные о ребёнке',
+      desc: 'Укажите возраст ребёнка в месяцах.',
+      nameLbl: 'Имя ребёнка (необязательно)', namePh: 'Например: Айдос',
+      ageLbl: 'Возраст в месяцах', agePh: 'Например: 24',
+      ageHint: '1,5 года = 18 мес, 2 года = 24 мес, 2,5 года = 30 мес.',
+      warn: 'Внимание: M-CHAT-R валидирован для возраста 16–30 месяцев. Вне этого диапазона результат носит ориентировочный характер. Для общей оценки развития рекомендуем основной скрининг Diagnostic 360.',
+      next: 'Перейти к вопросам →',
+      errAge: 'Укажите возраст ребёнка от 12 до 48 месяцев.'
+    },
+    quiz: { of:'из', yes:'Да', no:'Нет' },
+    report: {
+      title: 'Результат скрининга M-CHAT-R',
+      child:'Ребёнок', age:'Возраст', mo:'мес.', score:'из 20 баллов',
+      lvlGreen:'Низкий риск', lvlYellow:'Средний риск', lvlRed:'Высокий риск',
+      recGreen:'✓ Риск низкий. Если ребёнку меньше 24 месяцев — повторите скрининг после второго дня рождения. Если развитие вызывает у вас беспокойство, обратитесь к специалисту независимо от результата.',
+      recYellow:'⚠ Средний риск. Рекомендуется пройти уточняющее интервью M-CHAT-R/F у специалиста (педиатр, невролог, дефектолог). Если риск подтвердится — направление на диагностическую оценку.',
+      recRed:'🚨 Высокий риск. Не откладывая, обратитесь за диагностической оценкой к специалисту (невролог, психиатр, дефектолог) и по программам раннего вмешательства.',
+      flagsSec:'Пункты, на которые стоит обратить внимание',
+      noFlags:'Риск-ответов нет.',
+      pdf:'📄 Сохранить PDF', again:'Пройти заново',
+      disc:'Важно: M-CHAT-R — скрининговый инструмент, а не диагностический. Только специалист может провести полноценную оценку и поставить диагноз.'
+    }
+  },
+  kz: {
+    appName: 'M-CHAT-R', appSub: 'Аутизм қаупінің скринингі · 16–30 ай',
+    welcome: {
+      title: 'M-CHAT-R скринингі',
+      desc: 'M-CHAT-R — 16–30 айлық балалардағы аутизм спектрі бұзылыстарының қаупін ерте анықтауға арналған халықаралық валидацияланған сауалнама. 20 «Иә/Жоқ» сұрағы, шамамен 5 минут, тіркеусіз.',
+      f1: '≈5 минут · 20 «Иә / Жоқ» сұрағы.',
+      f2: '16 айдан 30 айға дейінгі балаларға арналған.',
+      f3: 'Ресми алгоритм бойынша қауіп деңгейі мен ұсынымдар.',
+      disc: 'Бұл скринингтік құрал, диагностикалық емес. Нәтиже диагноз болып табылмайды.',
+      start: 'Скринингті бастау →'
+    },
+    child: {
+      title: 'Баланың деректері',
+      desc: 'Баланың жасын айлармен көрсетіңіз.',
+      nameLbl: 'Баланың аты (міндетті емес)', namePh: 'Мысалы: Айдос',
+      ageLbl: 'Жасы (айлармен)', agePh: 'Мысалы: 24',
+      ageHint: '1,5 жас = 18 ай, 2 жас = 24 ай, 2,5 жас = 30 ай.',
+      warn: 'Назар аударыңыз: M-CHAT-R 16–30 ай аралығына валидацияланған. Бұл диапазоннан тыс нәтиже тек бағдарлық сипатта болады. Жалпы дамуды бағалау үшін негізгі Diagnostic 360 скринингін ұсынамыз.',
+      next: 'Сұрақтарға өту →',
+      errAge: 'Баланың жасын 12 мен 48 ай аралығында көрсетіңіз.'
+    },
+    quiz: { of:'/', yes:'Иә', no:'Жоқ' },
+    report: {
+      title: 'M-CHAT-R скрининг нәтижесі',
+      child:'Бала', age:'Жасы', mo:'ай', score:'балл (20-дан)',
+      lvlGreen:'Төмен қауіп', lvlYellow:'Орташа қауіп', lvlRed:'Жоғары қауіп',
+      recGreen:'✓ Қауіп төмен. Бала 24 айдан кіші болса — екінші туған күнінен кейін скринингті қайталаңыз. Дамуы алаңдатса, нәтижеге қарамастан маманға жүгініңіз.',
+      recYellow:'⚠ Орташа қауіп. Маманнан (педиатр, невролог, дефектолог) M-CHAT-R/F нақтылау сұхбатынан өту ұсынылады. Қауіп расталса — диагностикалық бағалауға жолдама.',
+      recRed:'🚨 Жоғары қауіп. Кешіктірмей диагностикалық бағалау үшін маманға (невролог, психиатр, дефектолог) және ерте араласу бағдарламаларына жүгініңіз.',
+      flagsSec:'Назар аударуды қажет ететін тармақтар',
+      noFlags:'Қауіп-жауаптар жоқ.',
+      pdf:'📄 PDF сақтау', again:'Қайтадан өту',
+      disc:'Маңызды: M-CHAT-R — скринингтік құрал, диагностикалық емес. Толық бағалау жүргізіп, диагноз қоюды тек маман жасай алады.'
+    }
+  }
+};
+
+// ─────────────────────────────────────────
+// QUESTIONS — 20 official M-CHAT-R items (RU/KZ verbatim)
+// ─────────────────────────────────────────
+const QS = [
+  { id:1,  ru:'Если Вы покажете на что-то в другом конце комнаты, посмотрит ли Ваш ребенок на это? (Например, если Вы покажете на игрушку или животное, посмотрит ли ребенок на игрушку или животное?)',
+           kz:'Егер сіз бөлменің келесі шетіндегі бір нәрсені көрсетсеңіз, балаңыз соған қарай ма? (Мысалы, ойыншықты немесе жануарды көрсетсеңіз, бала сол ойыншыққа немесе жануарға қарай ма?)' },
+  { id:2,  ru:'Возникали ли у Вас когда-либо мысли о том, что Ваш ребенок глухой?',
+           kz:'Сізде ешқашан «баламның естуі нашар (саңырау) емес пе» деген ой болды ма?' },
+  { id:3,  ru:'Играет ли Ваш ребенок в имитационные или сюжетно-ролевые игры? (Например, притворяется, будто пьет из пустой чашки, разговаривает по телефону или кормит куклу/плюшевого мишку?)',
+           kz:'Балаңыз еліктеу немесе сюжеттік-рөлдік ойындар ойнай ма? (Мысалы, бос шыныаяқтан шай ішіп жатқандай кейіп таныту, телефонмен сөйлесу немесе қуыршақты/қонжықты тамақтандыру?)' },
+  { id:4,  ru:'Нравится ли Вашему ребенку залезать на предметы? (Например, на мебель, элементы детской площадки или лестницы?)',
+           kz:'Балаңызға заттардың үстіне шығу ұнай ма? (Мысалы, жиһазға, ойын алаңындағы құрылғыларға немесе сатыға?)' },
+  { id:5,  ru:'Делает ли Ваш ребенок необычные движения пальцами перед своими глазами? (Например, машет пальцами перед глазами?)',
+           kz:'Балаңыз көз алдында саусақтарымен ерекше қимылдар жасай ма? (Мысалы, көз алдында саусақтарын жыпылықтатып қозғалту?)' },
+  { id:6,  ru:'Указывает ли Ваш ребенок пальцем, чтобы попросить о чем-то или получить помощь? (Например, указывает на игрушку или еду, которую не может достать?)',
+           kz:'Балаңыз бір нәрсені сұрау немесе көмек алу үшін саусағымен нұсқай ма? (Мысалы, қолы жетпейтін ойыншықты немесе тамақты нұсқау?)' },
+  { id:7,  ru:'Указывает ли Ваш ребенок пальцем, чтобы показать Вам что-то интересное? (Например, указывает на самолет в небе или на большую машину на улице?)',
+           kz:'Балаңыз сізге қызықты бір нәрсені көрсету үшін саусағымен нұсқай ма? (Мысалы, аспандағы ұшақты немесе көшедегі үлкен көлікті нұсқау?)' },
+  { id:8,  ru:'Интересуется ли Ваш ребенок другими детьми? (Например, смотрит ли ребенок на других детей, улыбается ли им, подходит ли к ним?)',
+           kz:'Балаңыз басқа балаларға қызығушылық таныта ма? (Мысалы, басқа балаларға қарай ма, оларға жымия ма, қастарына бара ма?)' },
+  { id:9,  ru:'Показывает ли Ваш ребенок Вам предметы, принося их или удерживая в руке, чтобы Вы посмотрели на них? Не для того, чтобы попросить помощи, а просто чтобы поделиться впечатлением?',
+           kz:'Балаңыз сізге бір затты көрсету үшін (көмек сұрау үшін емес, жай ғана бөлісу үшін) оны әкеліп немесе қолында ұстап тұрып көрсете ме?' },
+  { id:10, ru:'Отзывается ли Ваш ребенок на свое имя, когда Вы его зовете? (Например, оборачивается ли он, смотрит ли на Вас, прекращает ли то, чем занимался?)',
+           kz:'Балаңызды атымен шақырғанда жауап бере ме? (Мысалы, сізге бұрылып қарай ма, істеп жатқан ісін тоқтата ма?)' },
+  { id:11, ru:'Когда Вы улыбаетесь Вашему ребенку, улыбается ли он в ответ?',
+           kz:'Сіз балаңызға жымиғанда, ол сізге жауап ретінде жымия ма?' },
+  { id:12, ru:'Расстраивают ли Вашего ребенка обычные бытовые шумы? (Например, плачет ли или закрывает уши руками от шума пылесоса или громкой музыки?)',
+           kz:'Балаңызды күнделікті тұрмыстық шулар мазасыздандыра ма? (Мысалы, шаңсорғыш немесе қатты музыка дыбысынан жылай ма немесе құлағын қолымен жаба ма?)' },
+  { id:13, ru:'Умеет ли Ваш ребенок ходить?',
+           kz:'Балаңыз жүре ала ма?' },
+  { id:14, ru:'Смотрит ли Ваш ребенок Вам в глаза, когда Вы говорите с ним, играете с ним или одеваете его?',
+           kz:'Сіз балаңызбен сөйлескенде, ойнағанда немесе оны киіндіргенде, ол сіздің көзіңізге қарай ма?' },
+  { id:15, ru:'Пытается ли Ваш ребенок повторять за Вами Ваши действия? (Например, махать рукой на прощание, хлопать в ладоши или издавать забавные звуки?)',
+           kz:'Балаңыз сіздің іс-әрекеттеріңізді қайталауға тырыса ма? (Мысалы, қоштасқанда қол бұлғау, шапалақтау немесе қызықты дыбыстар шығару?)' },
+  { id:16, ru:'Если Вы повернете голову, чтобы посмотреть на что-то, повернется ли Ваш ребенок, чтобы посмотреть туда же?',
+           kz:'Егер сіз бір нәрсеге қарау үшін басыңызды бұрсаңыз, балаңыз да сол жаққа қарау үшін бұрыла ма?' },
+  { id:17, ru:'Пытается ли Ваш ребенок привлечь Ваше внимание к тому, что он делает? (Например, смотрит ли он на Вас, чтобы Вы его похвалили, или говорит «смотри»?)',
+           kz:'Балаңыз өзінің істеп жатқан ісіне сіздің назарыңызды аударуға тырыса ма? (Мысалы, мақтағаныңызды күтіп сізге қарай ма немесе «қарашы» дей ме?)' },
+  { id:18, ru:'Понимает ли Ваш ребенок, когда Вы говорите ему сделать что-то? (Например, если Вы не жестикулируете, поймет ли он просьбу «положи книгу на стол» или «принеси мяч»?)',
+           kz:'Балаңыз оған бір нәрсе істеуді айтқанда түсіне ме? (Мысалы, егер сіз ишарат (жест) жасамасаңыз, ол «кітапты үстелге қой» немесе «допты әкел» деген өтінішті түсіне ме?)' },
+  { id:19, ru:'Если случается что-то новое, смотрит ли Ваш ребенок Вам в лицо, чтобы понять Вашу реакцию? (Например, если он услышит странный звук или увидит новую игрушку, посмотрит ли он на Ваше лицо?)',
+           kz:'Егер жаңа бір нәрсе болса, балаңыз сіздің реакцияңызды түсіну үшін бетіңізге қарай ма? (Мысалы, оғаш дыбыс естісе немесе жаңа ойыншық көрсе, сіздің жүзіңізге қарай ма?)' },
+  { id:20, ru:'Нравится ли Вашему ребенку двигательная активность? (Например, когда его качают на качелях или подбрасывают на коленях?)',
+           kz:'Балаңызға қозғалыс белсенділігі ұнай ма? (Мысалы, оны әткеншекте тербеткенде немесе тізеңізге салып секірткенде?)' },
+];
+
+// ─────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────
+function tx(obj, key) { const p = key.split('.'); let v = obj; for (const k of p) v = v?.[k]; return v || key; }
+function t(key) { return tx(T[S.lang], key); }
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function setLang(l) { S.lang = l; render(); }
+function goTo(scr) { S.screen = scr; render(); window.scrollTo(0, 0); }
+function ageOutOfRange() { return S.childAge !== null && (S.childAge < 16 || S.childAge > 30); }
+
+// ─────────────────────────────────────────
+// SCORING (official M-CHAT-R algorithm)
+// ─────────────────────────────────────────
+function isRisk(id, ans) { return REVERSE.has(id) ? ans === 'yes' : ans === 'no'; }
+function calcScore() {
+  let score = 0; const flagged = [];
+  QS.forEach(q => {
+    const ans = S.answers[q.id];
+    if (ans !== undefined && isRisk(q.id, ans)) { score++; flagged.push(q); }
+  });
+  return { score, flagged };
+}
+function riskCls(score) { return score <= 2 ? 'green' : score <= 7 ? 'yellow' : 'red'; }
+
+// ─────────────────────────────────────────
+// FLOW
+// ─────────────────────────────────────────
+function startQuiz() {
+  const age = parseInt(document.getElementById('ageInput').value);
+  const name = document.getElementById('nameInput').value.trim();
+  if (!age || age < 12 || age > 48) { alert(t('child.errAge')); return; }
+  S.childAge = age; S.childName = name; S.qIdx = 0; S.answers = {};
+  goTo('quiz');
+}
+function checkAgeWarn() {
+  const age = parseInt(document.getElementById('ageInput').value);
+  const el = document.getElementById('ageWarn');
+  if (el) el.style.display = (age && (age < 16 || age > 30)) ? 'block' : 'none';
+}
+function answer(val) {
+  S.answers[QS[S.qIdx].id] = val;
+  if (S.qIdx < QS.length - 1) { S.qIdx++; render(); window.scrollTo(0, 0); }
+  else goTo('report');
+}
+function savePDF() {
+  if (S.screen !== 'report') { S.screen = 'report'; render(); }
+  setTimeout(() => window.print(), 80);
+}
+function pct() {
+  if (S.screen === 'welcome') return 0;
+  if (S.screen === 'child') return 8;
+  if (S.screen === 'quiz') return 8 + Math.round(84 * S.qIdx / QS.length);
+  return 100;
+}
+
+// ─────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────
+function nav(progress) {
+  return `<div class="nav">
+    <div class="nav-logo">D°</div>
+    <div><div class="nav-title">${t('appName')}</div><div class="nav-sub">${t('appSub')}</div></div>
+    <div class="lang-switcher">
+      ${['ru','kz'].map(l=>`<button class="lang-btn${S.lang===l?' active':''}" onclick="setLang('${l}')">${l.toUpperCase()}</button>`).join('')}
+    </div>
+  </div>
+  ${progress ? `<div class="progress-wrap"><div class="progress-bar" style="width:${pct()}%"></div></div>` : ''}`;
+}
+
+function screenWelcome() {
+  return `${nav(false)}<div class="content">
+    <div class="welcome-logo">D°</div>
+    <h1 class="welcome-title">${t('welcome.title')}</h1>
+    <p class="welcome-desc">${t('welcome.desc')}</p>
+    <div class="features">
+      <div class="feature"><span class="feature-icon">⏱️</span><span class="feature-text">${t('welcome.f1')}</span></div>
+      <div class="feature"><span class="feature-icon">👶</span><span class="feature-text">${t('welcome.f2')}</span></div>
+      <div class="feature"><span class="feature-icon">📊</span><span class="feature-text">${t('welcome.f3')}</span></div>
+    </div>
+    <div class="disclaimer">${t('welcome.disc')}</div>
+    <button class="btn btn-primary" onclick="goTo('child')">${t('welcome.start')}</button>
+    <p class="footer-note">Diagnostic 360 · Basqa Development Space · M-CHAT-R™ © 2009 Robins, Fein, & Barton</p>
+  </div>`;
+}
+
+function screenChild() {
+  return `${nav(true)}<div class="content">
+    <div class="section-h"><h2>${t('child.title')}</h2><p>${t('child.desc')}</p></div>
+    <div class="form-group">
+      <label class="form-label" for="nameInput">${t('child.nameLbl')}</label>
+      <input class="form-input" type="text" id="nameInput" placeholder="${t('child.namePh')}" value="${S.childName}">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="ageInput">${t('child.ageLbl')} <span class="req">*</span></label>
+      <input class="form-input" type="number" id="ageInput" placeholder="${t('child.agePh')}" min="12" max="48" value="${S.childAge||''}" oninput="checkAgeWarn()">
+      <div class="form-hint">${t('child.ageHint')}</div>
+    </div>
+    <div class="age-warn" id="ageWarn" style="display:${ageOutOfRange()?'block':'none'}">${t('child.warn')}</div>
+    <button class="btn btn-primary" onclick="startQuiz()">${t('child.next')}</button>
+  </div>`;
+}
+
+function screenQuiz() {
+  const q = QS[S.qIdx];
+  return `${nav(true)}<div class="content">
+    <div class="q-meta">
+      <div class="domain-badge">M-CHAT-R</div>
+      <div class="q-counter">${S.qIdx+1} ${t('quiz.of')} ${QS.length}</div>
+    </div>
+    <div class="q-text">${q[S.lang] || q.ru}</div>
+    <button class="ans-btn yes" onclick="answer('yes')">${t('quiz.yes')}</button>
+    <button class="ans-btn no" onclick="answer('no')">${t('quiz.no')}</button>
+  </div>`;
+}
+
+function screenReport() {
+  const { score, flagged } = calcScore();
+  const cls = riskCls(score);
+  const emoji = {green:'✅', yellow:'⚠️', red:'🚨'}[cls];
+  const childLabel = S.childName || t('report.child');
+  const date = new Date().toLocaleDateString(S.lang==='kz'?'kk-KZ':'ru-RU');
+  const outOfRange = ageOutOfRange();
+
+  const flagRows = flagged.map(q =>
+    `<div class="flag-item"><span class="flag-num">${q.id}</span><span>${q[S.lang] || q.ru}</span></div>`
+  ).join('');
+
+  const printFlags = flagged.map(q =>
+    `<div class="print-domain-row"><span><strong>№${q.id}</strong> ${q[S.lang] || q.ru}</span></div>`
+  ).join('');
+
+  return `${nav(false)}<div class="content">
+    <div class="report-center">
+      <div class="report-light light-${cls}">${emoji}</div>
+      <div class="report-lvl lvl-${cls}">${t('report.lvl'+cap(cls))}</div>
+      <div class="score-big sc-${cls}">${score} ${t('report.score')}</div>
+      <div class="report-meta">${childLabel} · ${t('report.age')} ${S.childAge} ${t('report.mo')} · ${date}</div>
+    </div>
+    <div class="rec rec-${cls}">${t('report.rec'+cap(cls))}</div>
+    ${outOfRange ? `<div class="age-warn">${t('child.warn')}</div>` : ''}
+    ${flagged.length ? `<div class="domains-label">${t('report.flagsSec')}</div><div class="flag-list">${flagRows}</div>` : ''}
+    <button class="btn btn-primary no-print" onclick="savePDF()">${t('report.pdf')}</button>
+    <button class="btn btn-secondary no-print" onclick="goTo('welcome')">${t('report.again')}</button>
+    <div class="disclaimer" style="margin-top:20px;">${t('report.disc')}</div>
+    <p class="footer-note">Diagnostic 360 · Basqa Development Space · M-CHAT-R™ © 2009 Robins, Fein, & Barton</p>
+  </div>
+
+  <div class="print-report" style="padding:24px 20px;font-family:Arial,sans-serif;">
+    <h2 style="color:#1F3864;margin-bottom:2px;">M-CHAT-R · Diagnostic 360</h2>
+    <p style="color:#6B7280;font-size:11px;margin-bottom:14px;">Basqa Development Space · ${date}</p>
+    <h3 style="margin-bottom:8px;">${t('report.title')}</h3>
+    <p style="margin-bottom:4px;"><strong>${childLabel}</strong> · ${t('report.age')} ${S.childAge} ${t('report.mo')}</p>
+    <p style="margin-bottom:12px;font-size:14px;">${t('report.lvl'+cap(cls))} — ${score} ${t('report.score')}</p>
+    <p style="margin-bottom:14px;font-size:13px;">${t('report.rec'+cap(cls)).replace(/^[✓⚠🚨]\s*/,'')}</p>
+    ${outOfRange ? `<p style="margin-bottom:12px;font-size:12px;color:#7F3B00;">${t('child.warn')}</p>` : ''}
+    ${flagged.length ? `<p style="font-weight:700;font-size:13px;margin-bottom:6px;">${t('report.flagsSec')}:</p><div>${printFlags}</div>` : `<p style="font-size:13px;">${t('report.noFlags')}</p>`}
+    <p style="margin-top:14px;font-size:11px;color:#6B7280;">${t('report.disc')} · M-CHAT-R™ © 2009 Robins, Fein, & Barton</p>
+  </div>`;
+}
+
+// ─────────────────────────────────────────
+// MAIN
+// ─────────────────────────────────────────
+function render() {
+  const map = { welcome:screenWelcome, child:screenChild, quiz:screenQuiz, report:screenReport };
+  document.getElementById('app').innerHTML = (map[S.screen] || screenWelcome)();
+}
+render();
+</script>
+</body>
+</html>
