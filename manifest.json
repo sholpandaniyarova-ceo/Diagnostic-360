@@ -1,0 +1,16 @@
+{
+  "name": "M-CHAT-R · Diagnostic 360",
+  "short_name": "M-CHAT-R",
+  "description": "Офлайн-скрининг риска аутизма (M-CHAT-R) для родителей и фельдшеров. Basqa Development Space.",
+  "start_url": "mchat.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F8FA",
+  "theme_color": "#005691",
+  "lang": "ru",
+  "icons": [
+    { "src": "icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" }
+  ]
+}

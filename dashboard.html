@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#005691">
+  <title>Кабинет специалиста · M-CHAT-R</title>
+  <style>
+    :root { --bg:#F7F8FA; --card:#FFFFFF; --ink:#1A1F36; --muted:#6B7280; --border:#E5E7EB; --blue:#005691; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+    .wrap { max-width:640px; margin:0 auto; min-height:100vh; background:var(--bg); }
+    .nav { display:flex; align-items:center; gap:12px; padding:16px 20px; background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:5; }
+    .logo { width:38px; height:38px; border-radius:10px; background:var(--blue); color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:15px; }
+    .nav-title { font-weight:700; font-size:15px; }
+    .nav-sub { font-size:12px; color:var(--muted); }
+    .spacer { flex:1; }
+    .lang { display:flex; gap:4px; }
+    .lang button { border:1px solid var(--border); background:#fff; border-radius:8px; padding:5px 9px; font-size:12px; font-weight:600; cursor:pointer; color:var(--muted); }
+    .lang button.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+    .content { padding:18px 20px 40px; }
+    .toolbar { display:flex; gap:8px; margin-bottom:16px; }
+    .toolbar button { flex:1; border:1px solid var(--border); background:#fff; border-radius:10px; padding:9px; font-size:13px; font-weight:600; cursor:pointer; color:var(--ink); }
+    .count { font-size:13px; color:var(--muted); margin-bottom:12px; }
+    .row { background:var(--card); border:1px solid var(--border); border-left:5px solid var(--border); border-radius:12px; padding:13px 15px; margin-bottom:10px; cursor:pointer; display:flex; align-items:center; gap:12px; }
+    .row.red { border-left-color:#DC2626; } .row.yellow { border-left-color:#D97706; } .row.green { border-left-color:#16A34A; }
+    .badge { font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+    .badge.red { background:#FEE2E2; color:#DC2626; } .badge.yellow { background:#FEF3C7; color:#B45309; } .badge.green { background:#DCFCE7; color:#15803D; }
+    .row-main { flex:1; min-width:0; }
+    .row-name { font-weight:700; font-size:14px; }
+    .row-meta { font-size:12px; color:var(--muted); margin-top:2px; }
+    .row-score { font-weight:800; font-size:16px; }
+    .empty { text-align:center; padding:50px 20px; color:var(--muted); }
+    .empty a { color:var(--blue); font-weight:600; text-decoration:none; }
+    .overlay { position:fixed; inset:0; background:rgba(26,31,54,.5); display:flex; align-items:flex-end; justify-content:center; z-index:20; }
+    .sheet { background:#fff; width:100%; max-width:640px; border-radius:18px 18px 0 0; padding:22px 20px 30px; }
+    .sheet h3 { font-size:18px; margin-bottom:4px; }
+    .sheet .sub { color:var(--muted); font-size:13px; margin-bottom:16px; }
+    .kv { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); font-size:14px; }
+    .kv span:first-child { color:var(--muted); }
+    .flags { margin-top:12px; font-size:13px; }
+    .flag-chip { display:inline-block; background:#F3F4F6; border-radius:8px; padding:3px 8px; margin:3px 3px 0 0; font-size:12px; font-weight:600; }
+    .close { margin-top:18px; width:100%; border:none; background:var(--blue); color:#fff; border-radius:10px; padding:12px; font-size:14px; font-weight:700; cursor:pointer; }
+    .foot { text-align:center; font-size:11px; color:#9CA3AF; margin-top:24px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="nav">
+    <div class="logo">D°</div>
+    <div><div class="nav-title" id="navTitle">Кабинет специалиста</div><div class="nav-sub">M-CHAT-R · Diagnostic 360</div></div>
+    <div class="spacer"></div>
+    <div class="lang">
+      <button id="lru" class="active" onclick="setLang('ru')">RU</button>
+      <button id="lkz" onclick="setLang('kz')">KZ</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="toolbar">
+      <button onclick="load()" id="btnRefresh">Обновить</button>
+      <button onclick="clearAll()" id="btnClear">Очистить (демо)</button>
+    </div>
+    <div class="count" id="count"></div>
+    <div id="list"></div>
+    <div class="foot">Basqa Development Space · M-CHAT-R™ © 2009 Robins, Fein, &amp; Barton</div>
+  </div>
+</div>
+<div id="modal"></div>
+
+<script>
+var LANG = 'ru';
+var TXT = {
+  ru: { title:'Кабинет специалиста', refresh:'Обновить', clear:'Очистить (демо)',
+        count:function(n){ return 'Направлений: ' + n; },
+        empty:'Пока нет направлений. Пройдите скрининг в приложении.', openApp:'Открыть скрининг →',
+        age:'Возраст', mo:'мес.', score:'Балл', of:'из 20', level:'Уровень риска', date:'Дата', flags:'Пункты риска',
+        red:'Высокий риск', yellow:'Средний риск', green:'Низкий риск', noflags:'Риск-ответов нет', close:'Закрыть',
+        confirm:'Очистить все направления? (только для демо)' },
+  kz: { title:'Маман кабинеті', refresh:'Жаңарту', clear:'Тазалау (демо)',
+        count:function(n){ return 'Жолдамалар: ' + n; },
+        empty:'Әзірге жолдама жоқ. Қосымшада скринингтен өтіңіз.', openApp:'Скринингті ашу →',
+        age:'Жасы', mo:'ай', score:'Балл', of:'20-дан', level:'Қауіп деңгейі', date:'Күні', flags:'Қауіп тармақтары',
+        red:'Жоғары қауіп', yellow:'Орташа қауіп', green:'Төмен қауіп', noflags:'Қауіп-жауаптар жоқ', close:'Жабу',
+        confirm:'Барлық жолдаманы тазалау керек пе? (тек демо үшін)' }
+};
+function t(){ return TXT[LANG]; }
+function setLang(l){ LANG = l; document.getElementById('lru').className = l==='ru'?'active':''; document.getElementById('lkz').className = l==='kz'?'active':''; load(); }
+function rank(c){ return c==='red'?0:c==='yellow'?1:2; }
+function getData(){ try { return JSON.parse(localStorage.getItem('mchat_referrals')||'[]'); } catch(e){ return []; } }
+
+function load(){
+  var arr = getData();
+  arr.sort(function(a,b){ return rank(a.cls)-rank(b.cls) || b.id-a.id; });
+  document.getElementById('navTitle').textContent = t().title;
+  document.getElementById('btnRefresh').textContent = t().refresh;
+  document.getElementById('btnClear').textContent = t().clear;
+  document.getElementById('count').textContent = t().count(arr.length);
+  var list = document.getElementById('list');
+  if (!arr.length){ list.innerHTML = '<div class="empty">'+t().empty+'<br><br><a href="mchat.html">'+t().openApp+'</a></div>'; return; }
+  list.innerHTML = arr.map(function(r){
+    var lvl = t()[r.cls];
+    var name = r.name || '—';
+    var d = new Date(r.date).toLocaleDateString(LANG==='kz'?'kk-KZ':'ru-RU');
+    return '<div class="row '+r.cls+'" onclick="detail('+r.id+')">'
+      + '<span class="badge '+r.cls+'">'+lvl+'</span>'
+      + '<div class="row-main"><div class="row-name">'+name+'</div>'
+      + '<div class="row-meta">'+t().age+' '+r.age+' '+t().mo+' · '+d+'</div></div>'
+      + '<div class="row-score '+r.cls+'">'+r.score+'</div></div>';
+  }).join('');
+}
+
+function detail(id){
+  var arr = getData();
+  var r = arr.filter(function(x){ return x.id===id; })[0];
+  if (!r) return;
+  var lvl = t()[r.cls];
+  var name = r.name || '—';
+  var d = new Date(r.date).toLocaleString(LANG==='kz'?'kk-KZ':'ru-RU');
+  var flags = (r.flags && r.flags.length)
+    ? r.flags.map(function(n){ return '<span class="flag-chip">№'+n+'</span>'; }).join('')
+    : t().noflags;
+  document.getElementById('modal').innerHTML =
+    '<div class="overlay" onclick="if(event.target===this)closeM()"><div class="sheet">'
+    + '<h3>'+name+'</h3><div class="sub">'+t().age+' '+r.age+' '+t().mo+'</div>'
+    + '<div class="kv"><span>'+t().level+'</span><span style="font-weight:700">'+lvl+'</span></div>'
+    + '<div class="kv"><span>'+t().score+'</span><span style="font-weight:700">'+r.score+' '+t().of+'</span></div>'
+    + '<div class="kv"><span>'+t().date+'</span><span>'+d+'</span></div>'
+    + '<div class="flags"><div style="color:#6B7280;margin-bottom:6px;">'+t().flags+':</div>'+flags+'</div>'
+    + '<button class="close" onclick="closeM()">'+t().close+'</button>'
+    + '</div></div>';
+}
+function closeM(){ document.getElementById('modal').innerHTML = ''; }
+function clearAll(){ if (confirm(t().confirm)){ localStorage.removeItem('mchat_referrals'); load(); } }
+
+window.addEventListener('storage', function(e){ if (e.key==='mchat_referrals') load(); });
+setInterval(load, 2000);
+load();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
+</script>
+</body>
+</html>

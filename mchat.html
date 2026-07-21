@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <title>M-CHAT-R — Скрининг риска аутизма · Diagnostic 360</title>
+  <meta name="theme-color" content="#005691">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root {
       --bg: #F7F8FA;
@@ -213,10 +216,70 @@
 // ─────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────
-const S = { lang:'ru', childAge:null, childName:'', qIdx:0, answers:{}, screen:'welcome' };
+const S = { lang:'ru', childAge:null, childName:'', qIdx:0, answers:{}, screen:'welcome', sent:false };
 
 // Items where YES is the risk response (official M-CHAT-R reverse items)
 const REVERSE = new Set([2, 5, 12]);
+
+// ─────────────────────────────────────────
+// WHO CST — caregiver support steps (shown on flag)
+// ─────────────────────────────────────────
+const CST = {
+  ru: {
+    title: 'Что можно делать дома уже сейчас',
+    steps: [
+      { t:'Присоединяйтесь к вниманию ребёнка', b:'Сядьте на уровень его глаз, лицом к лицу. Заметьте, что его увлекает, и присоединитесь к этому занятию, а не переключайте внимание. Достаточно нескольких минут несколько раз в день.' },
+      { t:'Зовите по имени и ждите отклик', b:'Подойдите близко, посмотрите в глаза и позовите по имени. Подождите несколько секунд. Если ребёнок посмотрел, издал звук или улыбнулся — тепло откликнитесь и улыбнитесь в ответ.' },
+      { t:'Показывайте и указывайте вместе', b:'Показывайте пальцем на интересные предметы и называйте их. Кладите желаемое чуть дальше вытянутой руки, побуждая указать или потянуться. Вместе используйте жесты — помахать, похлопать в ладоши.' },
+      { t:'Превращайте бытовые дела в игру', b:'Во время одевания, кормления, купания называйте свои действия, затем сделайте паузу и дождитесь реакции ребёнка. Повторяйте его звуки и движения, обменивайтесь по очереди — так формируется общение.' }
+    ],
+    refTitle: 'Проконсультируйтесь со специалистом',
+    ref: {
+      yellow: 'Эти шаги поддерживают развитие дома, но не заменяют оценку специалиста. Запланируйте консультацию со специалистом по развитию ребёнка и продолжайте наблюдать за изменениями.',
+      red: 'Запланируйте консультацию со специалистом по развитию ребёнка в приоритетном порядке, как можно скорее. Именно в этом возрасте ранняя поддержка наиболее важна.'
+    }
+  },
+  kz: {
+    title: 'Үйде қазірден бастап не істеуге болады',
+    steps: [
+      { t:'Баланың назарына қосылыңыз', b:'Онымен бір деңгейде, бетпе-бет отырыңыз. Оның не нәрсеге қызығып жатқанын бақылап, сол ойынға қосылыңыз — назарын басқа нәрсеге аудармаңыз. Күніне бірнеше рет, бес минуттан жеткілікті.' },
+      { t:'Атымен шақырып, жауабын күтіңіз', b:'Балаға жақындап, көзіне қарап атымен шақырыңыз. Бірнеше секунд күтіңіз. Ол қараса, дыбыс шығарса немесе жымисса — жылы жауап беріп, жымиып қойыңыз.' },
+      { t:'Көрсету мен нұсқауды бірге жасаңыз', b:'Қызық заттарды саусақпен нұсқап, атап беріңіз. Баланың қолы жетер-жетпес жерге ұнаған нәрсені қойып, нұсқауға немесе созылуға ынталандырыңыз. Ишараттарды бірге жасаңыз.' },
+      { t:'Күнделікті істерді ойынға айналдырыңыз', b:'Киіндіру, тамақтандыру, шомылдыру кезінде не істеп жатқаныңызды атап айтыңыз, содан кейін кідіріп, баланың жауабын күтіңіз. Оның дыбыстары мен қимылдарын қайталап, кезекпен жауаптасыңыз.' }
+    ],
+    refTitle: 'Маманмен кеңесіңіз',
+    ref: {
+      yellow: 'Бұл қадамдар үйдегі дамуды қолдайды, бірақ маманның бағалауын алмастырмайды. Бала дамуы маманымен кеңесуді жоспарлап, өзгерістерді бақылауды жалғастырыңыз.',
+      red: 'Бала дамуы маманымен кеңесуді бірінші кезекте, мүмкіндігінше тезірек жоспарлаңыз. Дәл осы кезеңде ерте қолдау ең маңызды.'
+    }
+  }
+};
+
+function supportBlock(cls) {
+  const c = CST[S.lang];
+  const steps = c.steps.map((s,i)=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-left:4px solid #005691;border-radius:12px;padding:12px 14px;margin-bottom:10px;text-align:left;">
+      <div style="font-weight:700;font-size:14px;color:#1A1F36;margin-bottom:4px;">${i+1}. ${s.t}</div>
+      <div style="font-size:13px;color:#4B5563;line-height:1.45;">${s.b}</div>
+    </div>`).join('');
+  const ref = cls==='red' ? c.ref.red : c.ref.yellow;
+  return `
+    <div style="margin-top:18px;">
+      <div class="domains-label">${c.title}</div>
+      ${steps}
+      <div style="background:#FFF4E8;border:1px solid #FFD8A8;border-left:4px solid #FF8300;border-radius:12px;padding:12px 14px;text-align:left;">
+        <div style="font-weight:700;font-size:14px;color:#7F3B00;margin-bottom:4px;">${c.refTitle}</div>
+        <div style="font-size:13px;color:#7F3B00;line-height:1.45;">${ref}</div>
+      </div>
+    </div>`;
+}
+
+function printSupport(cls) {
+  const c = CST[S.lang];
+  const items = c.steps.map((s,i)=>`<p style="font-size:12px;margin-bottom:4px;"><strong>${i+1}. ${s.t}.</strong> ${s.b}</p>`).join('');
+  const ref = cls==='red' ? c.ref.red : c.ref.yellow;
+  return `<p style="font-weight:700;font-size:13px;margin:12px 0 6px;">${c.title}:</p>${items}<p style="font-size:12px;margin-top:6px;"><strong>${c.refTitle}.</strong> ${ref}</p>`;
+}
 
 // ─────────────────────────────────────────
 // TRANSLATIONS
@@ -231,7 +294,8 @@ const T = {
       f2: 'Для детей от 16 до 30 месяцев.',
       f3: 'Результат с уровнем риска и рекомендациями по официальному алгоритму.',
       disc: 'Это скрининговый, а не диагностический инструмент. Результат не является диагнозом.',
-      start: 'Начать скрининг →'
+      start: 'Начать скрининг →',
+      specialist: 'Кабинет специалиста →'
     },
     child: {
       title: 'Данные о ребёнке',
@@ -254,6 +318,7 @@ const T = {
       flagsSec:'Пункты, на которые стоит обратить внимание',
       noFlags:'Риск-ответов нет.',
       pdf:'📄 Сохранить PDF', again:'Пройти заново',
+      send:'Отправить специалисту', sentOk:'✓ Направление отправлено специалисту',
       disc:'Важно: M-CHAT-R — скрининговый инструмент, а не диагностический. Только специалист может провести полноценную оценку и поставить диагноз.'
     }
   },
@@ -266,7 +331,8 @@ const T = {
       f2: '16 айдан 30 айға дейінгі балаларға арналған.',
       f3: 'Ресми алгоритм бойынша қауіп деңгейі мен ұсынымдар.',
       disc: 'Бұл скринингтік құрал, диагностикалық емес. Нәтиже диагноз болып табылмайды.',
-      start: 'Скринингті бастау →'
+      start: 'Скринингті бастау →',
+      specialist: 'Маман кабинеті →'
     },
     child: {
       title: 'Баланың деректері',
@@ -289,6 +355,7 @@ const T = {
       flagsSec:'Назар аударуды қажет ететін тармақтар',
       noFlags:'Қауіп-жауаптар жоқ.',
       pdf:'📄 PDF сақтау', again:'Қайтадан өту',
+      send:'Маманға жіберу', sentOk:'✓ Жолдама маманға жіберілді',
       disc:'Маңызды: M-CHAT-R — скринингтік құрал, диагностикалық емес. Толық бағалау жүргізіп, диагноз қоюды тек маман жасай алады.'
     }
   }
@@ -371,7 +438,7 @@ function startQuiz() {
   const age = parseInt(document.getElementById('ageInput').value);
   const name = document.getElementById('nameInput').value.trim();
   if (!age || age < 12 || age > 48) { alert(t('child.errAge')); return; }
-  S.childAge = age; S.childName = name; S.qIdx = 0; S.answers = {};
+  S.childAge = age; S.childName = name; S.qIdx = 0; S.answers = {}; S.sent = false;
   goTo('quiz');
 }
 function checkAgeWarn() {
@@ -387,6 +454,14 @@ function answer(val) {
 function savePDF() {
   if (S.screen !== 'report') { S.screen = 'report'; render(); }
   setTimeout(() => window.print(), 80);
+}
+function sendToSpecialist(cls, score) {
+  const rec = { id: Date.now(), name: S.childName || '', age: S.childAge, score: score, cls: cls, lang: S.lang, date: new Date().toISOString(), flags: calcScore().flagged.map(function(q){ return q.id; }) };
+  let arr = [];
+  try { arr = JSON.parse(localStorage.getItem('mchat_referrals') || '[]'); } catch(e) {}
+  arr.push(rec);
+  try { localStorage.setItem('mchat_referrals', JSON.stringify(arr)); } catch(e) {}
+  S.sent = true; render(); window.scrollTo(0, 0);
 }
 function pct() {
   if (S.screen === 'welcome') return 0;
@@ -421,6 +496,7 @@ function screenWelcome() {
     </div>
     <div class="disclaimer">${t('welcome.disc')}</div>
     <button class="btn btn-primary" onclick="goTo('child')">${t('welcome.start')}</button>
+    <a href="dashboard.html" class="no-print" style="display:inline-block;margin-top:14px;font-size:13px;color:#005691;text-decoration:none;font-weight:600;">${t('welcome.specialist')}</a>
     <p class="footer-note">Diagnostic 360 · Basqa Development Space · M-CHAT-R™ © 2009 Robins, Fein, & Barton</p>
   </div>`;
 }
@@ -479,9 +555,11 @@ function screenReport() {
       <div class="report-meta">${childLabel} · ${t('report.age')} ${S.childAge} ${t('report.mo')} · ${date}</div>
     </div>
     <div class="rec rec-${cls}">${t('report.rec'+cap(cls))}</div>
+    ${cls!=='green' ? supportBlock(cls) : ''}
     ${outOfRange ? `<div class="age-warn">${t('child.warn')}</div>` : ''}
     ${flagged.length ? `<div class="domains-label">${t('report.flagsSec')}</div><div class="flag-list">${flagRows}</div>` : ''}
-    <button class="btn btn-primary no-print" onclick="savePDF()">${t('report.pdf')}</button>
+    ${S.sent ? `<div class="rec rec-green no-print">${t('report.sentOk')}</div>` : `<button class="btn btn-primary no-print" onclick="sendToSpecialist('${cls}', ${score})">${t('report.send')}</button>`}
+    <button class="btn btn-secondary no-print" onclick="savePDF()">${t('report.pdf')}</button>
     <button class="btn btn-secondary no-print" onclick="goTo('welcome')">${t('report.again')}</button>
     <div class="disclaimer" style="margin-top:20px;">${t('report.disc')}</div>
     <p class="footer-note">Diagnostic 360 · Basqa Development Space · M-CHAT-R™ © 2009 Robins, Fein, & Barton</p>
@@ -496,6 +574,7 @@ function screenReport() {
     <p style="margin-bottom:14px;font-size:13px;">${t('report.rec'+cap(cls)).replace(/^[✓⚠🚨]\s*/,'')}</p>
     ${outOfRange ? `<p style="margin-bottom:12px;font-size:12px;color:#7F3B00;">${t('child.warn')}</p>` : ''}
     ${flagged.length ? `<p style="font-weight:700;font-size:13px;margin-bottom:6px;">${t('report.flagsSec')}:</p><div>${printFlags}</div>` : `<p style="font-size:13px;">${t('report.noFlags')}</p>`}
+    ${cls!=='green' ? printSupport(cls) : ''}
     <p style="margin-top:14px;font-size:11px;color:#6B7280;">${t('report.disc')} · M-CHAT-R™ © 2009 Robins, Fein, & Barton</p>
   </div>`;
 }
@@ -508,6 +587,10 @@ function render() {
   document.getElementById('app').innerHTML = (map[S.screen] || screenWelcome)();
 }
 render();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
 </script>
 </body>
 </html>
